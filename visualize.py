@@ -21,8 +21,10 @@ import math
 import os.path
 import time
 import numpy as np
-import tensorflow as tf
-from tensorflow.contrib import slim
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+#from tensorflow.contrib import slim
+import tf_slim as slim
 
 import common
 import model

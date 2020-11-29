@@ -63,7 +63,10 @@ python train.py \
     --train_logdir=./logs \
     --loss_function=sce
 ```
-
+Training with 8gb commodity GPU:
+```
+python train.py     --model_variant=shufflenet_v2     --tf_initial_checkpoint=./checkpoints/model.ckpt     --training_number_of_steps=120000     --base_learning_rate=0.001     --fine_tune_batch_norm=True     --initialize_last_layer=False     --output_stride=16     --train_crop_size=769     --train_crop_size=769     --train_batch_size=3     --dataset=cityscapes     --train_split=train     --dataset_dir=./dataset/cityscapes/tfrecord     --train_logdir=./logs     --loss_function=sce
+```
 **Important:** To use DPC architecture in your model, you should also set this parameter:
 
     --dense_prediction_cell_json=./core/dense_prediction_cell_branch5_top1_cityscapes.json
@@ -80,6 +83,11 @@ python evaluate.py \
     --checkpoint_dir=./logs \
     --dataset=cityscapes \
     --dataset_dir=./dataset/cityscapes/tfrecord
+```
+### Visualize
+In order to visualize segmentation for the Cityscapes dataset:
+```
+python visualize.py --checkpoint_dir checkpoints --vis_logdir logs --dataset_dir dataset/cityscapes/tfrecord/
 ```
 
 **Important:** If you are trying to evaluate a checkpoint that uses DPC architecture, you should also set this parameter:  
