@@ -6,8 +6,10 @@ See model.py for more details and usage.
 
 import math
 import six
-import tensorflow as tf
-from tensorflow.contrib import slim
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+#from tensorflow.contrib import slim
+import tf_slim as slim
 
 import common
 import model
@@ -129,7 +131,7 @@ def main(unused_argv):
             predictions, labels, dataset.num_classes, weights=weights)
 
         metrics_to_values, metrics_to_updates = (
-            tf.contrib.metrics.aggregate_metric_map(metric_map))
+            slim.metrics.aggregate_metric_map(metric_map))
 
         for metric_name, metric_value in six.iteritems(metrics_to_values):
             slim.summaries.add_scalar_summary(

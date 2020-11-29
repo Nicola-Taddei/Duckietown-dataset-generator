@@ -6,8 +6,11 @@ Türkmen, Sercan, and Janne Heikkilä.
 arXiv preprint arXiv:1902.07476 (2019).
 (https://arxiv.org/abs/1902.07476)
 """
-import tensorflow as tf
-from tensorflow.contrib import slim
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+import tf_slim as slim
+
+
 from core import dense_prediction_cell
 from core import feature_extractor
 from core import utils

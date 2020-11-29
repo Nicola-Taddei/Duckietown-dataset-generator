@@ -5,9 +5,10 @@ See model.py for more details and usage.
 """
 
 import six
-import tensorflow as tf
-from tensorflow.contrib import slim
-
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+#from tensorflow.contrib import slim
+import tf_slim as slim
 from dataset import segmentation_dataset
 from utils import input_generator
 from utils import train_utils

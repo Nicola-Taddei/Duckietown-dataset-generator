@@ -1,8 +1,10 @@
 
 """Extracts features for different models."""
 import functools
-import tensorflow as tf
-from tensorflow.contrib import slim
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+import tf_slim as slim
+
 
 from nets.mobilenet import mobilenet_v2
 from core import shufflenet_v2

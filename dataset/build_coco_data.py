@@ -6,7 +6,7 @@ import math
 import numpy as np
 import PIL.Image
 from pycocotools import mask
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import build_data
 

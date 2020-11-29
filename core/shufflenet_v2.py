@@ -1,7 +1,9 @@
 
 """Implementation of Shufflenet V2"""
-import tensorflow as tf
-from tensorflow.contrib import slim
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+import tf_slim as slim
+
 
 
 BATCH_NORM_MOMENTUM = 0.997
@@ -30,7 +32,7 @@ def training_scope(is_training=True,
     params = {
         'padding': 'SAME', 'activation_fn': tf.nn.relu,
         'normalizer_fn': batch_norm, 'data_format': 'NHWC',
-        'weights_initializer': tf.contrib.layers.xavier_initializer()
+        #'weights_initializer': tf.glorot_uniform_initializer()
     }
 
     with slim.arg_scope([batch_norm], **batch_norm_params), \
@@ -208,7 +210,7 @@ def basic_unit_with_downsampling(x, out_channels=None, stride=2, rate=1):
 def separable_conv2d(
         x, kernel=3, stride=1, padding='SAME',
         activation_fn=None, normalizer_fn=None,
-        weights_initializer=tf.contrib.layers.xavier_initializer(),
+        #weights_initializer=tf.initializers.GlorotUniform(),
         data_format='NHWC', scope='separable_conv2d', rate=1):
 
     with tf.variable_scope(scope):
@@ -217,7 +219,7 @@ def separable_conv2d(
         W = tf.get_variable(
             'depthwise_weights',
             [kernel, kernel, in_channels, 1], dtype=tf.float32,
-            initializer=weights_initializer
+            #initializer=weights_initializer
         )
         x = tf.nn.depthwise_conv2d(
             x, W, [1, stride, stride, 1], padding, rate=(rate, rate) if rate > 1 else None, data_format='NHWC')

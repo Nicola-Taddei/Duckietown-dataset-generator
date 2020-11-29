@@ -2,9 +2,11 @@
 """Utility functions for training."""
 
 import six
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+#from tensorflow.contrib import slim
+import tf_slim as slim
 
-import tensorflow as tf
-from tensorflow.contrib import slim
 from core import preprocess_utils
 from utils.loss import lovasz_softmax
 

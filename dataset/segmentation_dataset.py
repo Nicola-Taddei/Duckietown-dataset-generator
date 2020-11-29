@@ -35,9 +35,11 @@ References:
 """
 import collections
 import os.path
-import tensorflow as tf
-from tensorflow.contrib import slim
-from tensorflow.contrib.slim import dataset, tfexample_decoder
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+import tf_slim as slim
+
+from tf_slim import dataset, tfexample_decoder
 
 
 _ITEMS_TO_DESCRIPTIONS = {

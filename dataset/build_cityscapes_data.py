@@ -51,7 +51,11 @@ import os.path
 import re
 import sys
 import build_data
-import tensorflow as tf
+
+
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+import tf_slim as slim
 
 FLAGS = tf.app.flags.FLAGS
 
