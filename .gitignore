@@ -121,4 +121,5 @@ data
 checkpoints
 vis
 dataset/cityscapes/*
+dataset/duckietown/*
 .idea
