@@ -20,7 +20,7 @@ CHECKPOINT_PATH = './logs/'
 
 WARMUP_STEP = 100
 EVAL_STEP = 1000
-CPU = False
+CPU = True
 config = None
 
 if CPU:
@@ -40,8 +40,10 @@ if __name__ == "__main__":
 
     g = tf.Graph()
     with g.as_default():
-        data = np.random.random_sample(input_size) * 255
-        data = tf.constant(data.astype(np.float32), name='data')
+        input_rgb = tf.placeholder(
+                tf.float32, INPUT_SIZE, name="input_rgb")
+
+        #
 
         model_options = common.ModelOptions(
             outputs_to_num_classes=outputs_to_num_classes,
@@ -50,7 +52,7 @@ if __name__ == "__main__":
             output_stride=OUTPUT_STRIDE)
 
         predictions = model.predict_labels(
-            data,
+            input_rgb,
             model_options=model_options,
             image_pyramid=None)
         predictions = predictions[common.OUTPUT_TYPE]
@@ -62,8 +64,10 @@ if __name__ == "__main__":
 
             time_arr = []
             for i in range (WARMUP_STEP + EVAL_STEP):
+                data = np.random.random_sample(input_size) * 255
+                #data = tf.constant(data.astype(np.float32), name='data')
                 start = time.time_ns()
-                segmentation = sess.run(predictions)
+                segmentation = sess.run(predictions,feed_dict={input_rgb: data})
                 end = time.time_ns()
 
                 if (i < WARMUP_STEP):
