@@ -20,6 +20,13 @@ CHECKPOINT_PATH = './logs/'
 
 WARMUP_STEP = 100
 EVAL_STEP = 1000
+CPU = False
+config = None
+
+if CPU:
+    config = tf.ConfigProto(
+        device_count = {'GPU': 0}
+    )
 
 if __name__ == "__main__":
     tf.logging.set_verbosity(tf.logging.INFO)
@@ -48,7 +55,7 @@ if __name__ == "__main__":
             image_pyramid=None)
         predictions = predictions[common.OUTPUT_TYPE]
 
-        with tf.Session(graph=g) as sess:
+        with tf.Session(graph=g,config=config) as sess:
             sess.run(tf.global_variables_initializer())
             saver = tf.train.Saver()
             saver.restore(sess, tf.train.latest_checkpoint(chkpt_path))
@@ -56,7 +63,7 @@ if __name__ == "__main__":
             time_arr = []
             for i in range (WARMUP_STEP + EVAL_STEP):
                 start = time.time_ns()
-                sess.run(predictions)
+                segmentation = sess.run(predictions)
                 end = time.time_ns()
 
                 if (i < WARMUP_STEP):
