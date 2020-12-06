@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import tensorflow.compat.v1 as tf
+from tensorflow.saved_model import simple_save
 
 import common
 import model
@@ -27,8 +28,7 @@ if CPU:
     config = tf.ConfigProto(
         device_count = {'GPU': 0}
     )
-
-if __name__ == "__main__":
+def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
     input_size = INPUT_SIZE
@@ -62,13 +62,15 @@ if __name__ == "__main__":
             saver = tf.train.Saver()
             saver.restore(sess, tf.train.latest_checkpoint(chkpt_path))
 
+            simple_save(sess, "saved_model/", {"input_rgb": input_rgb}, {"output": predictions})
+
             time_arr = []
             for i in range (WARMUP_STEP + EVAL_STEP):
                 data = np.random.random_sample(input_size) * 255
                 #data = tf.constant(data.astype(np.float32), name='data')
-                start = time.time_ns()
+                start = time.time()
                 segmentation = sess.run(predictions,feed_dict={input_rgb: data})
-                end = time.time_ns()
+                end = time.time()
 
                 if (i < WARMUP_STEP):
                     # its warmup skip this step
@@ -78,4 +80,9 @@ if __name__ == "__main__":
 
             avg_time = np.average(time_arr)
 
-            print('avg fps: {}, avg inference time: {} ms'.format(1e9 / avg_time, avg_time/1e6))
+            print('avg fps: {}, avg inference time: {} ms'.format(1/avg_time, avg_time/1000))
+
+if __name__ == "__main__":
+    main()
+
+    
