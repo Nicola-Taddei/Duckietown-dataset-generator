@@ -103,6 +103,9 @@ _IMAGE_FORMAT = '%06d_image'
 # The format to save prediction
 _PREDICTION_FORMAT = '%06d_prediction'
 
+# The format to save raw prediction
+_RAW_PREDICTION_FORMAT = '%06d_raw_prediction'
+
 # The format to save ground truth
 _GROUNDTRUTH_FORMAT = '%06d_groundtruth'
 
@@ -176,6 +179,11 @@ def _process_batch(sess, original_images, semantic_predictions, image_names,
             crop_semantic_prediction, save_dir,
             _PREDICTION_FORMAT % (image_id_offset + i), add_colormap=True,
             colormap_type=FLAGS.colormap_type)
+
+        # Save raw prediction.
+        save_annotation.save_annotation(
+            crop_semantic_prediction, save_dir,
+            _RAW_PREDICTION_FORMAT % (image_id_offset + i), add_colormap=False)
 
         # Save groundtruth.
         if label is not None:

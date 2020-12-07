@@ -7,7 +7,7 @@ arXiv preprint arXiv:1902.07476 (2019).
 (https://arxiv.org/abs/1902.07476)
 """
 import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+#tf.disable_v2_behavior()
 import tf_slim as slim
 
 
@@ -147,7 +147,7 @@ def predict_labels(images, model_options, image_pyramid=None):
             scales_to_logits[MERGED_LOGITS_SCOPE],
             tf.shape(images)[1:3],
             align_corners=True)
-        predictions[output] = tf.argmax(logits, 3)
+        predictions[output] = tf.argmax(logits, 3, name="output")
 
     return predictions
 

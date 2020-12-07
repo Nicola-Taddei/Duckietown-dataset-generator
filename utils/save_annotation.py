@@ -34,8 +34,11 @@ def save_annotation(label,
             label, colormap_type)
     else:
         colored_label = label
-
-    pil_image = img.fromarray(colored_label.astype(dtype=np.uint8))
+    
+    mode = None
+    if len(colored_label.shape)==2:
+      mode = "L" #Greyscale PNG
+    pil_image = img.fromarray(colored_label.astype(dtype=np.uint8), mode=mode)
     if not isinstance(filename, str):
         filename = filename.decode('utf-8')
     with tf.gfile.Open("{}/{}.png".format(save_dir, filename), mode='wb') as f:
