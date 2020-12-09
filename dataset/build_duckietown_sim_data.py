@@ -26,6 +26,9 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 _NUM_SHARDS = 10
 
+JSON_FILE_PREFIX="/duckie_merged"
+IMAGE_FILE_PATH="/merged/rgb/"
+#IMAGE_FILE_PATH="/"
 
 def getCatIds(annotations, catNms=None, supNms=None, catIds=None):
     """
@@ -65,7 +68,7 @@ def _convert_dataset(dataset_split, dataset_dir, cat_nms=None):
       RuntimeError: If loaded image and label have different shape.
     """
 
-    with tf.gfile.GFile(dataset_dir + '/duckie_sim_{}.json'.format(dataset_split), 'r') as fid:
+    with tf.gfile.GFile(dataset_dir + f'{JSON_FILE_PREFIX}_{dataset_split}.json', 'r') as fid:
         groundtruth_data = json.load(fid)
 
     # with tf.gfile.GFile(dataset_dir + '/annotations/instances_{}2017.json'.format(dataset_split), 'r') as fid:
@@ -146,7 +149,7 @@ def _convert_dataset(dataset_split, dataset_dir, cat_nms=None):
                 # Read the image.
                 img, segmented = data[i]
                 image_filename = os.path.join(
-                    dataset_dir + '/dt_segmentation_dataset/sim/rgb_160_120/'.format(dataset_split), img['file_name'])
+                    dataset_dir + IMAGE_FILE_PATH.format(dataset_split), img['file_name'])
 
                 # image_data = tf.gfile.GFile(image_filename, 'rb').read()
                 image_p = PIL.Image.open(image_filename)

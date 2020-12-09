@@ -23,7 +23,8 @@ def preprocess_image_and_label(image,
                                scale_factor_step_size=0,
                                ignore_label=255,
                                is_training=True,
-                               model_variant=None):
+                               model_variant=None,
+                               color_augmentation=False):
     """Preprocesses the image and label.
 
     Args:
@@ -87,6 +88,12 @@ def preprocess_image_and_label(image,
             min_scale_factor, max_scale_factor, scale_factor_step_size)
         processed_image, label = preprocess_utils.randomly_scale_image_and_label(
             processed_image, label, scale)
+        #Jitter for use, saturation, brightness and contrast
+        if color_augmentation:
+            processed_image = tf.image.random_saturation(processed_image,0,10)
+            processed_image = tf.image.random_brightness(processed_image, 0.2)
+            processed_image = tf.image.random_contrast(processed_image, 0, 0.5)
+            processed_image = tf.image.random_hue(processed_image, 0.1)
         processed_image.set_shape([None, None, 3])
 
     # Pad image and label to have dimensions >= [crop_height, crop_width]
