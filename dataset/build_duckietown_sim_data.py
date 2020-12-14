@@ -26,8 +26,10 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 _NUM_SHARDS = 10
 
-JSON_FILE_PREFIX="/duckie_merged"
-IMAGE_FILE_PATH="/merged/rgb/"
+#JSON_FILE_PREFIX="/duckie_merged"
+JSON_FILE_PREFIX="/duckie_js"
+IMAGE_FILE_PATH="/w_bezier/rgb_orig/"
+#IMAGE_FILE_PATH="/merged/rgb/"
 #IMAGE_FILE_PATH="/"
 
 def getCatIds(annotations, catNms=None, supNms=None, catIds=None):

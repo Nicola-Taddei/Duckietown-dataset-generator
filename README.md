@@ -78,13 +78,14 @@ python train.py \
     --base_learning_rate=0.001 \
     --fine_tune_batch_norm=True \
     --initialize_last_layer=False \
-    --output_stride=16 \
+    --output_stride=4 \
     --train_crop_size=160 \
     --train_crop_size=160 \
     --train_batch_size=16 \
-    --dataset=cityscapes \
+    --dataset=duckietown \
     --train_split=train \
     --dataset_dir=./dataset/duckietown/sim/tfrecords \
+    --save_summaries_images \
     --train_logdir=./logs \
     --loss_function=sce
 ```
@@ -93,23 +94,47 @@ python train.py \
     --dense_prediction_cell_json=./core/dense_prediction_cell_branch5_top1_cityscapes.json
 
 ### Example evaluation configuration
-
+Cityscapes:
 ```sh
 python evaluate.py \
     --model_variant=shufflenet_v2 \
     --eval_crop_size=1025 \
     --eval_crop_size=2049 \
-    --output_stride=16 \
+    --output_stride=4 \
     --eval_logdir=./logs/eval \
     --checkpoint_dir=./logs \
     --dataset=cityscapes \
     --dataset_dir=./dataset/cityscapes/tfrecord
 ```
-### Visualize
+Duckietown:
+```sh
+python evaluate.py \
+    --model_variant=shufflenet_v2 \
+    --eval_crop_size=1025 \
+    --eval_crop_size=2049 \
+    --output_stride=4 \
+    --eval_logdir=./logs/eval \
+    --checkpoint_dir=./logs \
+    --dataset=duckietown \
+    --dataset_dir=./dataset/duckietown/tfrecords
+```
+## Visualize
+
+### Cityscapes
 In order to visualize segmentation for the Cityscapes dataset:
 ```
 python visualize.py --checkpoint_dir checkpoints --vis_logdir logs --dataset_dir dataset/cityscapes/tfrecord/
 ```
+### DuckieTown
+In order to visualize segmentation for the Cityscapes dataset:
+```
+python visualize.py --checkpoint_dir logs \
+     --vis_logdir logs \
+      --dataset_dir dataset/duckietown/sim/tfrecords/ \
+      --output_stride 4 \
+      --dataset duckietown
+```
+
 
 **Important:** If you are trying to evaluate a checkpoint that uses DPC architecture, you should also set this parameter:  
 
