@@ -1,5 +1,5 @@
-# dt-object-detection-exercise
-Repo for the object detection homework
+# mobile segmentation solution for Duckietown
+This is based on the Object Detection Exercise repository.
 
 ## Setup
 

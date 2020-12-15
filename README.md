@@ -140,6 +140,10 @@ python visualize.py --checkpoint_dir logs \
 
     --dense_prediction_cell_json=./core/dense_prediction_cell_branch5_top1_cityscapes.json
 
+## Running on Duckietown:
+
+See the [solution folder](solution)
+
 ## Exporting to TFLITE model
 
 `export_tflite.py` script contains several parameters at the top of the script.
