@@ -1,0 +1,25 @@
+status: error
+msg: "InvalidEvaluator:\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.8/site-packages/duckietown_experiment_manager/code.py\"\
+  , line 286, in main\n    length_s = await run_episode(\n  File \"/usr/local/lib/python3.8/site-packages/duckietown_experiment_manager/code.py\"\
+  , line 577, in run_episode\n    await loop.run_in_executor(executor, f)\n  File\
+  \ \"/usr/local/lib/python3.8/concurrent/futures/thread.py\", line 57, in run\n \
+  \   result = self.fn(*self.args, **self.kwargs)\n  File \"/usr/local/lib/python3.8/site-packages/zuper_nodes_wrapper/wrapper_outside.py\"\
+  , line 143, in write_topic_and_expect_zero\n    msgs = read_reply(self.fpout, timeout=timeout,\
+  \ nickname=self.nickname)\n  File \"/usr/local/lib/python3.8/site-packages/zuper_nodes_wrapper/wrapper_outside.py\"\
+  , line 304, in read_reply\n    others = read_until_over(fpout, timeout=timeout,\
+  \ nickname=nickname)\n  File \"/usr/local/lib/python3.8/site-packages/zuper_nodes_wrapper/wrapper_outside.py\"\
+  , line 338, in read_until_over\n    raise RemoteNodeAborted(msg) from None\nzuper_nodes.structures.RemoteNodeAborted:\
+  \ External node \"simulator\" closed communication.\n\nThe above exception was the\
+  \ direct cause of the following exception:\n\nTraceback (most recent call last):\n\
+  \  File \"/usr/local/lib/python3.8/site-packages/duckietown_challenges/cie_concrete.py\"\
+  , line 681, in scoring_context\n    yield cie\n  File \"/usr/local/lib/python3.8/site-packages/duckietown_experiment_manager/experiment_manager.py\"\
+  , line 68, in go\n    wrap(cie)\n  File \"/usr/local/lib/python3.8/site-packages/duckietown_experiment_manager/experiment_manager.py\"\
+  , line 34, in wrap\n    asyncio.run(main(cie, logdir, attempts), debug=True)\n \
+  \ File \"/usr/local/lib/python3.8/asyncio/runners.py\", line 44, in run\n    return\
+  \ loop.run_until_complete(main)\n  File \"/usr/local/lib/python3.8/asyncio/base_events.py\"\
+  , line 616, in run_until_complete\n    return future.result()\n  File \"/usr/local/lib/python3.8/site-packages/duckietown_experiment_manager/code.py\"\
+  , line 383, in main\n    raise dc.InvalidEvaluator(msg) from e\nduckietown_challenges.exceptions.InvalidEvaluator:\
+  \ Anomalous error while running episodes:\n"
+scores: {}
+stats: {}
+ipfs_hashes: {}
