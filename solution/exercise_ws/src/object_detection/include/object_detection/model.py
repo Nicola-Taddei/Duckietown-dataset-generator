@@ -19,11 +19,38 @@ class Wrapper():
         self.white_lines_mask = (self.seg==2).astype(np.uint8)
     
     def get_yellow_segments_px(self):
+        #return self.get_nearest_segments_px(self.yellow_lines_mask)
         return self.get_line_segments_px(self.yellow_lines_mask)
     
     def get_white_segments_px(self):
-        return self.get_line_segments_px(self.white_lines_mask)
-        
+        return self.get_nearest_segments_px(self.white_lines_mask)
+        #return self.get_line_segments_px(self.white_lines_mask)
+
+    @staticmethod
+    def get_nearest_segments_px(mask):
+        flip_mask = cv2.flip(mask, 0)
+        line = np.argmax(flip_mask[:],axis=0)
+        points=[]
+        for x,y in enumerate(line):
+            if (y!=0):
+                y=-y+119
+                points.append([x,y])
+        segments_px=[]
+        i=0
+        pt1=None
+        pt2=None
+        for point in points:
+            if i==0:
+                pt1 = point
+                i=1
+                continue
+            if i==1:
+                pt2 = point
+                segment = (pt1, pt2)
+                segments_px.append(segment)
+                i=0
+                continue
+        return segments_px
 
     @staticmethod
     def get_line_segments_px(mask):
