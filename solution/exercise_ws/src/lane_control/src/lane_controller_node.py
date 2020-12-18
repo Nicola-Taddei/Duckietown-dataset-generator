@@ -322,7 +322,7 @@ class LaneControllerNode(DTROS):
         #
         alpha = np.arctan(aim_point[1]/aim_point[0])
         d_alpha = alpha-self.last_alpha
-        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",8)
+        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",10)
         car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",100)
 
         self.last_alpha = alpha

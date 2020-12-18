@@ -23,7 +23,8 @@ from cv_bridge import CvBridge
 
 class ObjectDetectionNode(DTROS):
 
-    def __init__(self, node_name, model_type="bezier"):
+    #def __init__(self, node_name, model_type="bezier"):
+    def __init__(self, node_name, model_type="segmentation"):
 
         # Initialize the DTROS parent class
         super(ObjectDetectionNode, self).__init__(
@@ -31,6 +32,14 @@ class ObjectDetectionNode(DTROS):
             node_type=NodeType.PERCEPTION
         )
         self.model_type = model_type
+        if self.model_type=="bezier":
+            self.height=320
+            self.width=240
+        elif self.model_type=="segmentation":
+            self.height=160
+            self.width=120
+        else:
+            raise ValueError(f"Unsuported model type: {model_type}")
 
 
         # Construct publishers
@@ -116,7 +125,7 @@ class ObjectDetectionNode(DTROS):
         # img_small = cv2.resize(image, (160,120))
         # self.model_wrapper.segment_cv2_image(img_small)
         # img_small = cv2.resize(image, (160, 120))
-        img_reg = cv2.resize(image, (320,240))
+        img_reg = cv2.resize(image, (self.height,self.width))
         self.model_wrapper.segment_cv2_image(img_reg)
         seg_img = self.model_wrapper.get_seg()
         yellow_segments_px = self.model_wrapper.get_yellow_segments_px() ###
@@ -139,18 +148,23 @@ class ObjectDetectionNode(DTROS):
 
         self.pub_seglist_filtered.publish(seg_msg)
 
-        rgb = np.zeros((seg_img.shape[0], seg_img.shape[1], 3))
+        bgr = np.zeros((seg_img.shape[0], seg_img.shape[1], 3))
 
-        rgb[(seg_img == 0)] = np.array([0, 0, 0]).astype(int)
-        rgb[(seg_img == 1)] = np.array([255, 255, 255]).astype(int)
-        rgb[(seg_img == 2)] = np.array([255, 255, 0]).astype(int)
-        rgb[(seg_img == 3)] = np.array([255, 0, 0]).astype(int)
-        rgb[(seg_img == 4)] = np.array([0, 0, 255]).astype(int)
-        rgb[(seg_img == 5)] = np.array([0, 255, 0]).astype(int)
+        if self.model_type=="bezier":
+            bgr[(seg_img == 0)] = np.array([0, 0, 0]).astype(int)
+            bgr[(seg_img == 1)] = np.array([255, 255, 255]).astype(int)
+            bgr[(seg_img == 2)] = np.array([255, 255, 0]).astype(int)
+            bgr[(seg_img == 3)] = np.array([255, 0, 0]).astype(int)
+            bgr[(seg_img == 4)] = np.array([0, 0, 255]).astype(int)
+            bgr[(seg_img == 5)] = np.array([0, 255, 0]).astype(int)
+        else:
+            bgr[(seg_img == 0)] = np.array([0, 0, 0]).astype(int)
+            bgr[(seg_img == 2)] = np.array([255, 255, 255]).astype(int)
+            bgr[(seg_img == 1)] = np.array([0, 255, 255]).astype(int)   
 
         # segmented_img_cv = cv2.applyColorMap(self.model_wrapper.seg*64, cv2.COLORMAP_JET)
 
-        segmented_img = self.bridge.cv2_to_compressed_imgmsg(rgb)
+        segmented_img = self.bridge.cv2_to_compressed_imgmsg(bgr)
         segmented_img.header.stamp = image_msg.header.stamp
         self.pub_segmented_img.publish(segmented_img)
 
@@ -192,10 +206,12 @@ class ObjectDetectionNode(DTROS):
         y=[]
         segments=[]
         for segment_px in segments_px:
-            pixel1 = Point(segment_px[0][0]*2,segment_px[0][1]*2) #Conversion. Points are converted in 640x480 for the homography to work
-            pixel2 = Point(segment_px[1][0]*2,segment_px[1][1]*2) #Conversion. Points are converted in 640x480 for the homography to work
-            #pixel1 = Point(segment_px[0][0]*4,segment_px[0][1]*4) #Conversion. Points are converted in 640x480 for the homography to work
-            #pixel2 = Point(segment_px[1][0]*4,segment_px[1][1]*4) #Conversion. Points are converted in 640x480 for the homography to work
+            if self.model_type=="bezier":
+                pixel1 = Point(segment_px[0][0]*2,segment_px[0][1]*2) #Conversion. Points are converted in 640x480 for the homography to work
+                pixel2 = Point(segment_px[1][0]*2,segment_px[1][1]*2) #Conversion. Points are converted in 640x480 for the homography to work
+            else:
+                pixel1 = Point(segment_px[0][0]*4,segment_px[0][1]*4) #Conversion. Points are converted in 640x480 for the homography to work
+                pixel2 = Point(segment_px[1][0]*4,segment_px[1][1]*4) #Conversion. Points are converted in 640x480 for the homography to work
             ground_projected_point1 = self.gpg.pixel2ground(pixel1)
             ground_projected_point2 = self.gpg.pixel2ground(pixel2)
             pt1 = (ground_projected_point1.x, ground_projected_point1.y)

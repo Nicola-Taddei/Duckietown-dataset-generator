@@ -14,7 +14,7 @@ class Wrapper():
             self.width=320
             self.height=240
         elif model_type=="segmentation":
-            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.onnx")
+            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.2012-12-11.onnx")
             self.width=160
             self.height=120
         else:
@@ -30,8 +30,8 @@ class Wrapper():
             self.white_lines_mask = (self.seg==2).astype(np.uint8)
             self.right_bezier_mask = (self.seg==5).astype(np.uint8)
         elif self.model_type=="bezier":
-            self.yellow_lines_mask = (self.seg==2).astype(np.uint8) ###
             self.white_lines_mask = (self.seg==1).astype(np.uint8) ###
+            self.yellow_lines_mask = (self.seg==2).astype(np.uint8) ###
             self.right_bezier_mask = (self.seg==5).astype(np.uint8)
 
     def get_seg(self):
@@ -41,10 +41,12 @@ class Wrapper():
         #return self.get_nearest_segments_px(self.yellow_lines_mask)
         return self.get_line_segments_px(self.yellow_lines_mask)
     
-    def get_white_segments_px(self): 
+    def get_white_segments_px(self, nearest_only=True): 
         #For the white segments, we dont want to be distracted by detection beyond the nearest white line.
-        return self.get_nearest_segments_px(self.white_lines_mask)
-        #return self.get_line_segments_px(self.white_lines_mask)
+        if nearest_only:
+            return self.get_nearest_segments_px(self.white_lines_mask)
+        else:
+            return self.get_line_segments_px(self.white_lines_mask)
 
     def get_right_bezier_px(self):
         #return self.get_nearest_segments_px(self.right_bezier_mask)
