@@ -19,6 +19,9 @@ tf.flags.DEFINE_string('category_names', None,
                        'Name of the categories to include')
 tf.flags.DEFINE_integer('min_pixels', 0,
                         'Minimum amount of pixels needed to include the image')
+                        
+tf.flags.DEFINE_string("coco_file_prefix","duckie_js", "Prefix of the JSON coco file"),
+tf.flags.DEFINE_string("image_file_path","w_bezier/rgb_orig/","Path where the images are stored relative to the dataset_dir")
 
 FLAGS = flags.FLAGS
 
@@ -27,8 +30,8 @@ tf.logging.set_verbosity(tf.logging.INFO)
 _NUM_SHARDS = 10
 
 #JSON_FILE_PREFIX="/duckie_merged"
-JSON_FILE_PREFIX="/duckie_js"
-IMAGE_FILE_PATH="/w_bezier/rgb_orig/"
+JSON_FILE_PREFIX=FLAGS.coco_file_prefix
+IMAGE_FILE_PATH=FLAGS.image_file_path
 #IMAGE_FILE_PATH="/merged/rgb/"
 #IMAGE_FILE_PATH="/"
 
@@ -70,7 +73,7 @@ def _convert_dataset(dataset_split, dataset_dir, cat_nms=None):
       RuntimeError: If loaded image and label have different shape.
     """
 
-    with tf.gfile.GFile(dataset_dir + f'{JSON_FILE_PREFIX}_{dataset_split}.json', 'r') as fid:
+    with tf.gfile.GFile(dataset_dir + f'/{JSON_FILE_PREFIX}_{dataset_split}.json', 'r') as fid:
         groundtruth_data = json.load(fid)
 
     # with tf.gfile.GFile(dataset_dir + '/annotations/instances_{}2017.json'.format(dataset_split), 'r') as fid:
@@ -151,7 +154,7 @@ def _convert_dataset(dataset_split, dataset_dir, cat_nms=None):
                 # Read the image.
                 img, segmented = data[i]
                 image_filename = os.path.join(
-                    dataset_dir + IMAGE_FILE_PATH.format(dataset_split), img['file_name'])
+                    dataset_dir, IMAGE_FILE_PATH.format(dataset_split), img['file_name'])
 
                 # image_data = tf.gfile.GFile(image_filename, 'rb').read()
                 image_p = PIL.Image.open(image_filename)
