@@ -11,8 +11,12 @@ class Wrapper():
         self.model_type=model_type
         if model_type=="bezier":
             self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation_bezier.onnx")
+            self.width=320
+            self.height=240
         elif model_type=="segmentation":
             self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.onnx")
+            self.width=160
+            self.height=120
         else:
             raise ValueError(f"Unsuported model type for segmentation: {model_type}")
         
@@ -43,16 +47,16 @@ class Wrapper():
         #return self.get_line_segments_px(self.white_lines_mask)
 
     def get_right_bezier_px(self):
+        #return self.get_nearest_segments_px(self.right_bezier_mask)
         return self.get_line_segments_px(self.right_bezier_mask)
 
-    @staticmethod
-    def get_nearest_segments_px(mask):
+    def get_nearest_segments_px(self,mask):
         flip_mask = cv2.flip(mask, 0)
         line = np.argmax(flip_mask[:],axis=0)
         points=[]
         for x,y in enumerate(line):
             if (y!=0):
-                y=-y+119
+                y=-y+self.height-1
                 points.append([x,y])
         segments_px=[]
         i=0

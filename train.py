@@ -25,6 +25,8 @@ FLAGS = flags.FLAGS
 
 # Settings for multi-GPUs/multi-replicas training.
 
+flags.DEFINE_boolean("color_augmentation", True,"Use color augmentatin")
+
 flags.DEFINE_integer('num_clones', 1, 'Number of clones to deploy.')
 
 flags.DEFINE_boolean('clone_on_cpu', False, 'Use CPUs to deploy clones.')
@@ -257,6 +259,7 @@ def main(unused_argv):
                 dataset_split=FLAGS.train_split,
                 is_training=True,
                 model_variant=FLAGS.model_variant,
+                color_augmentation=FLAGS.color_augmentation,
                 num_readers=8,
                 num_threads=8)
             inputs_queue = prefetch_queue.prefetch_queue(

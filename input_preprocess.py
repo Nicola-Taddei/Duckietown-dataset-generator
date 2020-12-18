@@ -93,7 +93,7 @@ def preprocess_image_and_label(image,
             processed_image = tf.image.random_saturation(processed_image,0,10)
             processed_image = tf.image.random_brightness(processed_image, 0.2)
             processed_image = tf.image.random_contrast(processed_image, 0, 0.5)
-            processed_image = tf.image.random_hue(processed_image, 0.1)
+            processed_image = tf.image.random_hue(processed_image, 0.01)
         processed_image.set_shape([None, None, 3])
 
     # Pad image and label to have dimensions >= [crop_height, crop_width]

@@ -60,6 +60,7 @@ def get(dataset,
         num_threads=1,
         dataset_split=None,
         is_training=True,
+        color_augmentation=False,
         model_variant=None):
     """Gets the dataset split for semantic segmentation.
 
@@ -132,6 +133,7 @@ def get(dataset,
         scale_factor_step_size=scale_factor_step_size,
         ignore_label=dataset.ignore_label,
         is_training=is_training,
+        color_augmentation=color_augmentation,
         model_variant=model_variant)
     sample = {
         common.IMAGE: image,

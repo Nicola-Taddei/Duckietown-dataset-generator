@@ -5,8 +5,8 @@ import rospkg
 import os
 import yaml
 from cv_bridge import CvBridge
-#import debugpy
-#debugpy.listen(("localhost", 5678))
+import debugpy
+debugpy.listen(("localhost", 5678))
 
 from duckietown.dtros import DTROS, NodeType, TopicType, DTParam, ParamType
 from sensor_msgs.msg import CompressedImage, Image
@@ -187,7 +187,7 @@ class ObjectDetectionNode(DTROS):
             seg_msg.segments.append(new_segment)
     
         
-    def ground_project_segments_px(self, segments_px, right_only=False, xmin=0.1, xmax=0.6):
+    def ground_project_segments_px(self, segments_px, right_only=False, xmin=0.0, xmax=1):
         x=[]
         y=[]
         segments=[]

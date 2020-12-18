@@ -13,7 +13,7 @@ from duckietown_msgs.msg import Twist2DStamped, LanePose, WheelsCmdStamped, Bool
 
 from lane_controller.controller import PurePursuitLaneController
 from scipy.optimize import curve_fit
-
+from sklearn.linear_model import RANSACRegressor
 # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
 
 def get_xy(points):
@@ -32,10 +32,15 @@ def fit_and_show(x,y, c="b"):
     return a,b
 
 
-def fit(x,y, c="b"):
+def fit(x,y, c="b", ransac=True):
     if len(x)>3:
-        popt, pcov = curve_fit(line_func, x, y)
-        return popt
+        if ransac:
+            reg = RANSACRegressor(random_state=0).fit(np.expand_dims(x,axis=1), y)
+            #print(reg)
+            return float(reg.estimator_.coef_), float(reg.estimator_.intercept_)
+        else:
+            popt, pcov = curve_fit(line_func, x, y)
+            return popt
     else:
         raise ValueError("Not enough data points")
 
@@ -317,7 +322,7 @@ class LaneControllerNode(DTROS):
         #
         alpha = np.arctan(aim_point[1]/aim_point[0])
         d_alpha = alpha-self.last_alpha
-        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",12)
+        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",8)
         car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",100)
 
         self.last_alpha = alpha
@@ -328,7 +333,7 @@ class LaneControllerNode(DTROS):
         #if 
         car_control_msg.v = rospy.get_param("speed",1)
         if abs(car_control_msg.omega) > rospy.get_param("turn_th",2):
-            car_control_msg.v = rospy.get_param("turn_speed",0.75)
+            car_control_msg.v = rospy.get_param("turn_speed",0.7)
 
         self.log(f"v={car_control_msg.v}, alpha = {alpha:.2f} omega = {car_control_msg.omega:.2f}. Aim: {aim_point[0]:.2f},{aim_point[1]:.2f}")
 
