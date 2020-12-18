@@ -1,5 +1,5 @@
-
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import common
 import model
 
@@ -9,12 +9,17 @@ FLAGS = flags.FLAGS
 
 INPUT_TENSOR_NAME = 'input_0'
 INPUT_SIZE = [1, 225, 225, 3]
-NUMBER_OF_CLASSES = 19
-OUTPUT_STRIDE = 16
+#NUMBER_OF_CLASSES = 19
+#OUTPUT_STRIDE = 16
+
+NUMBER_OF_CLASSES = 6
+OUTPUT_STRIDE = 4
+
 
 MODEL_VARIANT = 'shufflenet_v2'
-USE_DPC = True
-CHECKPOINT_PATH = './checkpoints/cityscapes/dpc'
+USE_DPC = False
+#CHECKPOINT_PATH = './checkpoints/cityscapes/dpc'
+CHECKPOINT_PATH = './logs'
 
 OUT_PATH_TFLITE = CHECKPOINT_PATH + '/tflite_graph.tflite'
 OUT_PATH_FROZEN_GRAPH = CHECKPOINT_PATH + '/frozen_graph.pb'
