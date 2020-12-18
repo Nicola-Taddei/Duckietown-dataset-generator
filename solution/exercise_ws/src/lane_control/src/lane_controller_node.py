@@ -32,7 +32,7 @@ def fit_and_show(x,y, c="b"):
     return a,b
 
 
-def fit(x,y, c="b", ransac=True):
+def fit(x,y, c="b", ransac=False):
     if len(x)>3:
         if ransac:
             reg = RANSACRegressor(random_state=0).fit(np.expand_dims(x,axis=1), y)
