@@ -28,23 +28,14 @@ Requirements:
 
 You can install all the dependencies except PyTorch with `pip3`:
 
+It might be a good idea to create a new conda environment first.
+```
+conda create -n duckietown_gym_py38 python=3.8
+conda activate duckietown_gym_py38
+```
+Then
 ```
 pip3 install -e .
-```
-
-## Installation Using Conda (Alternative Method)
-
-Alternatively, you can install all the dependencies, including PyTorch, using Conda as follows. For those trying to use this package on MILA machines, this is the way to go:
-
-```
-conda env create -f environment.yaml
-```
-
-Please note that if you use Conda to install this package instead of pip, you will need to activate your Conda environment and add the package to your Python path before you can use it:
-
-```
-source activate gym-duckietown
-export PYTHONPATH="${PYTHONPATH}:`pwd`"
 ```
 
 ## Genrating a dataset

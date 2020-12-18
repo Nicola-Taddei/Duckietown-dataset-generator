@@ -188,6 +188,7 @@ class LaneControllerNode(DTROS):
 
         yellow_lines = []
         white_lines = []
+        bezier_lines = []
 
         lines_dict = {}
 
@@ -206,9 +207,15 @@ class LaneControllerNode(DTROS):
                 #White line.
                 white_lines.append((start,end))
 
+            elif segment.color==2:
+                #Bezier lines are registered as red for now, as only three different colors are available and we are not
+                #using red for now
+                bezier_lines.append((start,end))
+
         lines = {}
         lines["white"] = white_lines
         lines["yellow"] = yellow_lines
+        lines["bezier"] = bezier_lines
 
         datalog = json.dumps(lines)
         if rospy.get_param("datalog",False) and (self.last_datalog!=datalog):
@@ -264,24 +271,35 @@ class LaneControllerNode(DTROS):
             a,b = fit(x_right,y_right)
             #plt.scatter(0,0, marker="D")
         
-            white_aim_point = get_aim_point(a,b,dist,-offset + rospy.get_param("white_offset",-0.10)) 
+            white_aim_point = get_aim_point(a,b,dist,-offset + rospy.get_param("white_offset",0)) 
             #plt.scatter(*white_aim_point, marker="X", c="k")
         except ValueError:
             pass
         #plt.xlim([0,1])
         #plt.ylim([-1,1])
+        bezier_aim_point=None
+        x, y = get_xy(lines["bezier"])
+        a_bez=b_bez=-1
+        try:
+            a_bez,b_bez = fit(x,y)
+            bezier_aim_point = get_aim_point(a_bez,b_bez,lookup_distance,offset=0)
+        except ValueError:
+            pass
         
         aim_point=None
-        if yellow_aim_point:
+        if bezier_aim_point:
+            aim_point = bezier_aim_point
+        elif yellow_aim_point:
             aim_point = yellow_aim_point
-            #if white_aim_point:
-            #    aim_point = (
-            #                    ((yellow_aim_point[0] + white_aim_point[0]) / 2),
-            #                    ((yellow_aim_point[1] + white_aim_point[1]) / 2)
-            #    )
+
+            if white_aim_point and rospy.get_param("yw_average",False):
+                aim_point = (
+                                ((yellow_aim_point[0] + white_aim_point[0]) / 2),
+                                ((yellow_aim_point[1] + white_aim_point[1]) / 2)
+                )
         else:
             aim_point = white_aim_point
-        
+
         if aim_point is None:
             aim_point = self.last_aim_point
         else:
@@ -289,19 +307,18 @@ class LaneControllerNode(DTROS):
 
         #aim_point = (aim_point[0], aim_point[1]+rospy.get_param("lane_offset", -0.03))
 
-        if abs(aim_point[1]) < rospy.get_param("hyst",0.10):
+        if abs(aim_point[1]) < rospy.get_param("hyst",0.03):
             aim_point = (aim_point[0], 0)
         
         
 
-        self.log(f"{yellow_aim_point}, {white_aim_point}")
+        #self.log('bezier aim point   yellow aim point   white aim point')
+        self.log(f"{bezier_aim_point}, {yellow_aim_point}, {white_aim_point}")
         #
         alpha = np.arctan(aim_point[1]/aim_point[0])
         d_alpha = alpha-self.last_alpha
-        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",7)
-        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",150)
-        if car_control_msg.omega < 0:
-            car_control_msg.omega*=rospy.get_param("right_bonus",1.5)
+        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",12)
+        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",100)
 
         self.last_alpha = alpha
 
@@ -309,9 +326,9 @@ class LaneControllerNode(DTROS):
         #norm_speed = max(rospy.get_param("turn_speed",0.7), norm * rospy.get_param("speed",1.0))
         #car_control_msg.v= norm_speed
         #if 
-        car_control_msg.v = rospy.get_param("speed",0.9)
+        car_control_msg.v = rospy.get_param("speed",1)
         if abs(car_control_msg.omega) > rospy.get_param("turn_th",2):
-            car_control_msg.v = rospy.get_param("turn_speed",0.5)
+            car_control_msg.v = rospy.get_param("turn_speed",0.75)
 
         self.log(f"v={car_control_msg.v}, alpha = {alpha:.2f} omega = {car_control_msg.omega:.2f}. Aim: {aim_point[0]:.2f},{aim_point[1]:.2f}")
 

@@ -23,14 +23,14 @@ from cv_bridge import CvBridge
 
 class ObjectDetectionNode(DTROS):
 
-    def __init__(self, node_name):
+    def __init__(self, node_name, model_type="bezier"):
 
         # Initialize the DTROS parent class
         super(ObjectDetectionNode, self).__init__(
             node_name=node_name,
             node_type=NodeType.PERCEPTION
         )
-
+        self.model_type = model_type
 
 
         # Construct publishers
@@ -73,10 +73,10 @@ class ObjectDetectionNode(DTROS):
         self.ai = AntiInstagram()
         self.bridge = CvBridge()
 
-        model_file = rospy.get_param('~model_file','.')
+        #model_file = rospy.get_param('~model_file','.')
         rospack = rospkg.RosPack()
-        model_file_absolute = rospack.get_path('object_detection') + model_file
-        self.model_wrapper = Wrapper(model_file_absolute)
+        #model_file_absolute = rospack.get_path('object_detection') + model_file
+        self.model_wrapper = Wrapper(self.model_type)
         self.homography = self.load_extrinsics()
         homography = np.array(self.homography).reshape((3, 3))
         self.bridge = CvBridge()
@@ -113,30 +113,48 @@ class ObjectDetectionNode(DTROS):
             )
         
         #image = cv2.resize(image, (224,224))
-        img_small = cv2.resize(image, (160,120))
-        self.model_wrapper.segment_cv2_image(img_small)
-        yellow_segments_px = self.model_wrapper.get_yellow_segments_px()
-        white_segments_px = self.model_wrapper.get_white_segments_px()
+        # img_small = cv2.resize(image, (160,120))
+        # self.model_wrapper.segment_cv2_image(img_small)
+        # img_small = cv2.resize(image, (160, 120))
+        img_reg = cv2.resize(image, (320,240))
+        self.model_wrapper.segment_cv2_image(img_reg)
+        seg_img = self.model_wrapper.get_seg()
+        yellow_segments_px = self.model_wrapper.get_yellow_segments_px() ###
+        white_segments_px = self.model_wrapper.get_white_segments_px() ###
+        right_bezier_segments_px = self.model_wrapper.get_right_bezier_px()
+        # left_bezier_segments_px = self.model_wrapper.get_left_bezier_px()
 
+        #ground project segments
         yellow_segments = self.ground_project_segments_px(yellow_segments_px)
-        #white_segments_px[0:60,0:160]=0 #Keep only white line of the left
-        #for segment in white_segments_px:
-
         white_segments = self.ground_project_segments_px(white_segments_px, right_only=True)
+        bezier_segments = self.ground_project_segments_px(right_bezier_segments_px)
 
         seg_msg = SegmentList()
         seg_msg.header = image_msg.header
         self.add_segments(yellow_segments, seg_msg, Segment.YELLOW)
         self.add_segments(white_segments, seg_msg, Segment.WHITE)
 
-        self.pub_seglist_filtered.publish(seg_msg)
-        segmented_img_cv = cv2.applyColorMap(self.model_wrapper.seg*64, cv2.COLORMAP_JET)
+        # no other color besides yellow, white and red, so using red for now, as it is not being used for the moment
+        self.add_segments(bezier_segments, seg_msg, Segment.RED)
 
-        segmented_img = self.bridge.cv2_to_compressed_imgmsg(segmented_img_cv)
+        self.pub_seglist_filtered.publish(seg_msg)
+
+        rgb = np.zeros((seg_img.shape[0], seg_img.shape[1], 3))
+
+        rgb[(seg_img == 0)] = np.array([0, 0, 0]).astype(int)
+        rgb[(seg_img == 1)] = np.array([255, 255, 255]).astype(int)
+        rgb[(seg_img == 2)] = np.array([255, 255, 0]).astype(int)
+        rgb[(seg_img == 3)] = np.array([255, 0, 0]).astype(int)
+        rgb[(seg_img == 4)] = np.array([0, 0, 255]).astype(int)
+        rgb[(seg_img == 5)] = np.array([0, 255, 0]).astype(int)
+
+        # segmented_img_cv = cv2.applyColorMap(self.model_wrapper.seg*64, cv2.COLORMAP_JET)
+
+        segmented_img = self.bridge.cv2_to_compressed_imgmsg(rgb)
         segmented_img.header.stamp = image_msg.header.stamp
         self.pub_segmented_img.publish(segmented_img)
 
-        print(f"Found {len(yellow_segments_px)} yellow segments")
+        print(f"Found {len(right_bezier_segments_px)} bezier segments")
             
         
         bboxes, classes, scores = self.model_wrapper.predict(image)
@@ -174,8 +192,10 @@ class ObjectDetectionNode(DTROS):
         y=[]
         segments=[]
         for segment_px in segments_px:
-            pixel1 = Point(segment_px[0][0]*4,segment_px[0][1]*4) #Conversion. Points are converted in 640x480 for the homography to work
-            pixel2 = Point(segment_px[1][0]*4,segment_px[1][1]*4) #Conversion. Points are converted in 640x480 for the homography to work
+            pixel1 = Point(segment_px[0][0]*2,segment_px[0][1]*2) #Conversion. Points are converted in 640x480 for the homography to work
+            pixel2 = Point(segment_px[1][0]*2,segment_px[1][1]*2) #Conversion. Points are converted in 640x480 for the homography to work
+            #pixel1 = Point(segment_px[0][0]*4,segment_px[0][1]*4) #Conversion. Points are converted in 640x480 for the homography to work
+            #pixel2 = Point(segment_px[1][0]*4,segment_px[1][1]*4) #Conversion. Points are converted in 640x480 for the homography to work
             ground_projected_point1 = self.gpg.pixel2ground(pixel1)
             ground_projected_point2 = self.gpg.pixel2ground(pixel2)
             pt1 = (ground_projected_point1.x, ground_projected_point1.y)

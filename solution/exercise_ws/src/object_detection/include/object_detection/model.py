@@ -6,25 +6,44 @@ class NoGPUAvailable(Exception):
     pass
 
 class Wrapper():
-    def __init__(self, model_file):
+    def __init__(self, model_type="bezier"):
         #Load the model
-        self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.onnx")
+        self.model_type=model_type
+        if model_type=="bezier":
+            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation_bezier.onnx")
+        elif model_type=="segmentation":
+            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.onnx")
+        else:
+            raise ValueError(f"Unsuported model type for segmentation: {model_type}")
         
     def segment_cv2_image(self, img):
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         np_img = img_rgb.reshape((1,*img_rgb.shape))
         res = self.sess_ort.run(output_names=["output:0"], input_feed={"input_rgb:0": np_img.astype(np.float32)})
         self.seg=res[0].astype(np.uint8).squeeze()
-        self.yellow_lines_mask = (self.seg==1).astype(np.uint8)
-        self.white_lines_mask = (self.seg==2).astype(np.uint8)
+        if self.model_type=="segmentation": #Mapping is reversed between the two models
+            self.yellow_lines_mask = (self.seg==1).astype(np.uint8)
+            self.white_lines_mask = (self.seg==2).astype(np.uint8)
+            self.right_bezier_mask = (self.seg==5).astype(np.uint8)
+        elif self.model_type=="bezier":
+            self.yellow_lines_mask = (self.seg==2).astype(np.uint8) ###
+            self.white_lines_mask = (self.seg==1).astype(np.uint8) ###
+            self.right_bezier_mask = (self.seg==5).astype(np.uint8)
+
+    def get_seg(self):
+        return self.seg
     
     def get_yellow_segments_px(self):
         #return self.get_nearest_segments_px(self.yellow_lines_mask)
         return self.get_line_segments_px(self.yellow_lines_mask)
     
-    def get_white_segments_px(self):
+    def get_white_segments_px(self): 
+        #For the white segments, we dont want to be distracted by detection beyond the nearest white line.
         return self.get_nearest_segments_px(self.white_lines_mask)
         #return self.get_line_segments_px(self.white_lines_mask)
+
+    def get_right_bezier_px(self):
+        return self.get_line_segments_px(self.right_bezier_mask)
 
     @staticmethod
     def get_nearest_segments_px(mask):
