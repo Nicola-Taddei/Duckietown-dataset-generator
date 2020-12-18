@@ -2,14 +2,14 @@
 The instructions in this file assume that you already downloaded or generated the raw datasets, and converted the dataset to a MS COCO format using one of the [Jupyter Notebooks in the notebooks folder](../notebooks/README.md) of this repository.
 
 ## Duckietown.
-### Simulation Dataset
+### Simulation + Real Dataset
 ```
-python build_duckietown_sim_data.py --dataset_dir duckietown --output_dir duckietown/sim/tfrecords
+ python build_duckietown_data.py --dataset_dir duckietown2 --output_dir duckietown2/merged_with_real/tfrecords --coco_file_prefix duckie_merged_with_real --image_file_path merged_with_real/rgb
 ```
 ### Real Dataset:
 Assuming all data and pre-processed JSON files are on the duckietown2 folder.
 ```
-python build_duckietown_sim_data.py --dataset_dir duckietown2 --output_dir duckietown2/real/tfrecords --coco_file_prefix duckie_real --image_file_path real/imgs
+python build_duckietown_data.py --dataset_dir duckietown2 --output_dir duckietown2/real/tfrecords --coco_file_prefix duckie_real --image_file_path real/imgs
 ```
 
 ## Cityscapes
