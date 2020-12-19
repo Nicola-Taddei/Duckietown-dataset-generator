@@ -1,7 +1,7 @@
 # DuckieTown adaptation of An efficient solution for semantic segmentation: ShuffleNet V2 with atrous separable convolutions
 This repository is a fork of the https://github.com/sercant/mobile-segmentation repository. They presented a computationally efficient approach to semantic segmentation, while achieving a high mean intersection over union (mIOU), 70.33% on Cityscapes challenge. The network proposed is capable of running real-time on mobile devices.
 
-This models performs pretty well in the Duckietown Simulator too!
+This models performs pretty well in the Duckietown Simulator too! 75.60% on the Duckietown Segmentation Dataset.
 
 ## Getting ready
 
@@ -34,7 +34,7 @@ Training on DuckieTown:
 python train.py \
     --model_variant=shufflenet_v2 \
     --tf_initial_checkpoint=./checkpoints/model.ckpt \
-    --training_number_of_steps=120000 \
+    --training_number_of_steps=12000 \
     --base_learning_rate=0.001 \
     --fine_tune_batch_norm=True \
     --initialize_last_layer=False \
@@ -98,18 +98,7 @@ python train.py     --model_variant=shufflenet_v2     --tf_initial_checkpoint=./
     --dense_prediction_cell_json=./core/dense_prediction_cell_branch5_top1_cityscapes.json
 
 ### Example evaluation configuration
-Cityscapes:
-```sh
-python evaluate.py \
-    --model_variant=shufflenet_v2 \
-    --eval_crop_size=1025 \
-    --eval_crop_size=2049 \
-    --output_stride=4 \
-    --eval_logdir=./logs/eval \
-    --checkpoint_dir=./logs \
-    --dataset=cityscapes \
-    --dataset_dir=./dataset/cityscapes/tfrecord
-```
+
 Duckietown:
 ```sh
 python evaluate.py \
@@ -121,6 +110,20 @@ python evaluate.py \
     --checkpoint_dir=./logs \
     --dataset=duckietown \
     --dataset_dir=./dataset/duckietown2/merged_with_real/tfrecords
+```
+
+
+Cityscapes:
+```sh
+python evaluate.py \
+    --model_variant=shufflenet_v2 \
+    --eval_crop_size=1025 \
+    --eval_crop_size=2049 \
+    --output_stride=4 \
+    --eval_logdir=./logs/eval \
+    --checkpoint_dir=./logs \
+    --dataset=cityscapes \
+    --dataset_dir=./dataset/cityscapes/tfrecord
 ```
 ## Visualize
 
