@@ -31,6 +31,8 @@ class ObjectDetectionNode(DTROS):
             node_name=node_name,
             node_type=NodeType.PERCEPTION
         )
+        self.duckie_alert = False
+        self.duckies_around= False
         self.model_type = model_type
         if self.model_type=="bezier":
             self.height=320
@@ -176,12 +178,8 @@ class ObjectDetectionNode(DTROS):
         
         msg = BoolStamped()
         msg.header = image_msg.header
-        if len(bboxes)==0:
-            #No detection at all!
-            msg.data = False
-        else:
-            msg.data = self.det2bool(bboxes[0], classes[0]) # [0] because our batch size given to the wrapper is 1
-        
+        msg.data = self.duckie_alert
+             
         self.pub_obj_dets.publish(msg)
 
     def add_segments(self, yellow_segments, seg_msg, color):
@@ -200,7 +198,30 @@ class ObjectDetectionNode(DTROS):
             new_segment.color = color
             seg_msg.segments.append(new_segment)
     
-        
+    def lookout_for_duckies(self):
+        nearest_duckies_px = self.model_wrapper.get_nearest_duckies_px()
+        ped_distance = rospy.get_param("ped_distance",0.3)
+        ped_left = -rospy.get_param("ped_left",0.03)
+        ped_right = rospy.get_param("ped_right",0.03)
+        self.duckie_alert = False
+        self.duckies_around = False
+        nearest_duckies = self.ground_project_segments_px(nearest_duckies_px)
+        for duckie_segment in nearest_duckies:
+            #There is some duckies around!
+            self.duckies_around=True
+            pt1 = duckie_segment[0]
+            pt2 = duckie_segment[1]
+            for pt in [pt1, pt2]:
+                x = pt[0]
+                y = pt[1]
+                #Distance in front of the Duckieboty 
+                #Distance left/right of the Duckiebot
+                if y > ped_left and y < ped_right:
+                    #There is a duckie bot in front of us!
+                    if x < ped_distance:
+                        # We're getting to close!
+                        self.duckie_alert=True
+      
     def ground_project_segments_px(self, segments_px, right_only=False, xmin=0.0, xmax=1):
         x=[]
         y=[]

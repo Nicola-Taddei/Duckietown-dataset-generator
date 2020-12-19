@@ -29,11 +29,15 @@ class Wrapper():
             self.yellow_lines_mask = (self.seg==1).astype(np.uint8)
             self.white_lines_mask = (self.seg==2).astype(np.uint8)
             self.right_bezier_mask = (self.seg==5).astype(np.uint8)
+            self.duckie_mask =  (self.seg==3).astype(np.uint8)
         elif self.model_type=="bezier":
             self.white_lines_mask = (self.seg==1).astype(np.uint8) ###
             self.yellow_lines_mask = (self.seg==2).astype(np.uint8) ###
             self.right_bezier_mask = (self.seg==5).astype(np.uint8)
 
+    def get_nearest_duckies_px(self):
+        return self.get_line_segments_px(self.duckie_mask, min_area=12)
+        
     def get_seg(self):
         return self.seg
     
