@@ -25,7 +25,7 @@ FLAGS = flags.FLAGS
 
 # Settings for multi-GPUs/multi-replicas training.
 
-flags.DEFINE_boolean("color_augmentation", True,"Use color augmentatin")
+flags.DEFINE_boolean("color_augmentation", False,"Use color augmentation")
 
 flags.DEFINE_integer('num_clones', 1, 'Number of clones to deploy.')
 

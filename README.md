@@ -22,6 +22,10 @@ This models performs pretty well in the Duckietown Simulator too!
 
 To learn more about the available flags you can check `common.py` and the specific script that you are trying to run (e.g. `train.py`).
 
+2-3 epochs of fine-tuning should be enough, more would likely cause overfitting. The model is already pre-trained on Cityscapes, so the final training is basically domain adaptation. 
+
+
+
 ### Example training configuration
 
 Training on DuckieTown:
@@ -35,17 +39,36 @@ python train.py \
     --fine_tune_batch_norm=True \
     --initialize_last_layer=False \
     --output_stride=4 \
-    --train_crop_size=160 \
+    --train_crop_size=120 \
     --train_crop_size=160 \
     --train_batch_size=16 \
     --dataset=duckietown \
     --train_split=train \
-    --dataset_dir=./dataset/duckietown/sim/tfrecords \
+    --dataset_dir=./dataset/duckietown2/merged_with_real/tfrecords \
     --save_summaries_images \
     --train_logdir=./logs \
     --loss_function=sce
 ```
 
+Train for Duckietown Bezier
+python train.py \
+    --model_variant=shufflenet_v2 \
+    --tf_initial_checkpoint=./checkpoints/model.ckpt \
+    --training_number_of_steps=120000 \
+    --base_learning_rate=0.001 \
+    --fine_tune_batch_norm=True \
+    --initialize_last_layer=False \
+    --output_stride=8 \
+    --train_crop_size=240 \
+    --train_crop_size=320 \
+    --train_batch_size=16 \
+    --dataset=duckietown \
+    --train_split=train \
+    --dataset_dir=./dataset/duckietown/bezier/tfrecords \
+    --save_summaries_images \
+    --train_logdir=./logs \
+    --loss_function=sce
+```
 
 ```sh
 python train.py \
@@ -91,13 +114,13 @@ Duckietown:
 ```sh
 python evaluate.py \
     --model_variant=shufflenet_v2 \
-    --eval_crop_size=1025 \
-    --eval_crop_size=2049 \
+    --eval_crop_size=120 \
+    --eval_crop_size=160 \
     --output_stride=4 \
     --eval_logdir=./logs/eval \
     --checkpoint_dir=./logs \
     --dataset=duckietown \
-    --dataset_dir=./dataset/duckietown/tfrecords
+    --dataset_dir=./dataset/duckietown2/merged_with_real/tfrecords
 ```
 ## Visualize
 
@@ -106,7 +129,7 @@ In order to visualize segmentation for the Duckietown dataset:
 ```
 python visualize.py --checkpoint_dir logs \
      --vis_logdir logs \
-      --dataset_dir dataset/duckietown/sim/tfrecords/ \
+      --dataset_dir dataset/duckietown2/merged_with_real/tfrecords/ \
       --output_stride 4 \
       --dataset duckietown
 ```
