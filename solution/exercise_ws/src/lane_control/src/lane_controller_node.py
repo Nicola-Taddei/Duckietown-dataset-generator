@@ -4,6 +4,7 @@ import rospy
 #import debugpy
 import os
 import json
+import math
 
 #import debugpy
 #debugpy.listen(("localhost", 5678))
@@ -61,9 +62,18 @@ def get_aim_point(a,b, dist, offset, white_line=False):
     if b > 0 and white_line:
         #Looks like we are about to cross the line,
         #let's turn right!
-        x, y = dist, rospy.get_param("patch_right_turn",-0.15)
+        x, y = dist, rospy.get_param("patch_right_turn",-0.25)
     return (x,y)
 
+def get_aim_point_v2(a,b, dist, offset):
+    xi, yi = dist,dist*a+b
+    angle = math.atan(-1/a)
+    dx, dy = offset*math.cos(angle), offset*math.sin(angle)
+    if a>0:
+        dy=-dy
+        dx=-dx
+    print(a,dx,dy)
+    return (xi-dx,yi-dy)
 
 class LaneControllerNode(DTROS):
     """Computes control action.
@@ -184,7 +194,7 @@ class LaneControllerNode(DTROS):
         relative_name = rospy.get_param("relative_name")
 
         lookup_distance = rospy.get_param("lookup_distance",0.30)
-        offset =  rospy.get_param("offset",0.22)
+        offset =  rospy.get_param("offset",0.18)
 
 
         if self.breakpoints_enabled:
@@ -245,13 +255,15 @@ class LaneControllerNode(DTROS):
         data=lines
         dist=lookup_distance
 
+        ransac = rospy.get_param("speed",True)
+
         #From "controller_exploration" notebook. See it for more details
         x, y = get_xy(data["yellow"])
         #plt.scatter(x,y, c="y")
         try:
             #a,b = fit_and_show(x,y, "y")
-            a,b = fit(x,y)
-            yellow_aim_point = get_aim_point(a,b,dist,offset)
+            a,b = fit(x,y,ransac)
+            yellow_aim_point = get_aim_point_v2(a,b,dist,offset)
             #plt.scatter(*yellow_aim_point, marker="X", c="y")
         except ValueError:
             pass
@@ -264,7 +276,7 @@ class LaneControllerNode(DTROS):
                 #print("bli")
                 #print(a,b)
                 for xval,yval in zip(x,y):
-                    if yval < float(a)*xval+float(b) and yval>0.25:
+                    if yval < float(a)*xval+float(b):
                         x_right.append(xval)
                         y_right.append(yval)
             else:
@@ -273,10 +285,10 @@ class LaneControllerNode(DTROS):
     
             #plt.scatter(x_right,y_right, c="k")
             #a,b = fit_and_show(x_right,y_right, "k")
-            a,b = fit(x_right,y_right)
+            a,b = fit(x_right,y_right,ransac)
             #plt.scatter(0,0, marker="D")
         
-            white_aim_point = get_aim_point(a,b,dist,-offset + rospy.get_param("white_offset",0)) 
+            white_aim_point = get_aim_point_v2(a,b,dist,-offset + rospy.get_param("white_offset",0)) 
             #plt.scatter(*white_aim_point, marker="X", c="k")
         except ValueError:
             pass
@@ -286,8 +298,8 @@ class LaneControllerNode(DTROS):
         x, y = get_xy(lines["bezier"])
         a_bez=b_bez=-1
         try:
-            a_bez,b_bez = fit(x,y)
-            bezier_aim_point = get_aim_point(a_bez,b_bez,lookup_distance,offset=0)
+            a_bez,b_bez = fit(x,y,ransac)
+            bezier_aim_point = get_aim_point_v2(a_bez,b_bez,lookup_distance,offset=0)
         except ValueError:
             pass
         
@@ -312,8 +324,8 @@ class LaneControllerNode(DTROS):
 
         #aim_point = (aim_point[0], aim_point[1]+rospy.get_param("lane_offset", -0.03))
 
-        if abs(aim_point[1]) < rospy.get_param("hyst",0.03):
-            aim_point = (aim_point[0], 0)
+        #if abs(aim_point[1]) < rospy.get_param("hyst",0.03):
+        #    aim_point = (aim_point[0], 0)
         
         
 
@@ -322,11 +334,12 @@ class LaneControllerNode(DTROS):
         #
         alpha = np.arctan(aim_point[1]/aim_point[0])
         d_alpha = alpha-self.last_alpha
-        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",10)
+        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",15)
         car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",100)
 
         self.last_alpha = alpha
 
+       
         #norm = max(0, 1 - abs(car_control_msg.omega))
         #norm_speed = max(rospy.get_param("turn_speed",0.7), norm * rospy.get_param("speed",1.0))
         #car_control_msg.v= norm_speed

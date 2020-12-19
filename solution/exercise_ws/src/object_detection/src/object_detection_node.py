@@ -32,6 +32,8 @@ class ObjectDetectionNode(DTROS):
             node_type=NodeType.PERCEPTION
         )
         self.model_type = model_type
+        self.duckie_alert = False
+        self.duckies_around= False
         if self.model_type=="bezier":
             self.height=320
             self.width=240
@@ -82,6 +84,7 @@ class ObjectDetectionNode(DTROS):
         self.ai = AntiInstagram()
         self.bridge = CvBridge()
 
+
         #model_file = rospy.get_param('~model_file','.')
         rospack = rospkg.RosPack()
         #model_file_absolute = rospack.get_path('object_detection') + model_file
@@ -131,12 +134,22 @@ class ObjectDetectionNode(DTROS):
         yellow_segments_px = self.model_wrapper.get_yellow_segments_px() ###
         white_segments_px = self.model_wrapper.get_white_segments_px() ###
         right_bezier_segments_px = self.model_wrapper.get_right_bezier_px()
+
+        
         # left_bezier_segments_px = self.model_wrapper.get_left_bezier_px()
 
         #ground project segments
         yellow_segments = self.ground_project_segments_px(yellow_segments_px)
-        white_segments = self.ground_project_segments_px(white_segments_px, right_only=True)
+        white_segments = self.ground_project_segments_px(white_segments_px, right_only=False)
         bezier_segments = self.ground_project_segments_px(right_bezier_segments_px)
+
+
+
+        
+        self.lookout_for_duckies()
+
+
+
 
         seg_msg = SegmentList()
         seg_msg.header = image_msg.header
@@ -161,6 +174,7 @@ class ObjectDetectionNode(DTROS):
             bgr[(seg_img == 0)] = np.array([0, 0, 0]).astype(int)
             bgr[(seg_img == 2)] = np.array([255, 255, 255]).astype(int)
             bgr[(seg_img == 1)] = np.array([0, 255, 255]).astype(int)   
+            bgr[(seg_img == 3)] = np.array([0, 0, 255]).astype(int)  
 
         # segmented_img_cv = cv2.applyColorMap(self.model_wrapper.seg*64, cv2.COLORMAP_JET)
 
@@ -176,13 +190,33 @@ class ObjectDetectionNode(DTROS):
         
         msg = BoolStamped()
         msg.header = image_msg.header
-        if len(bboxes)==0:
-            #No detection at all!
-            msg.data = False
-        else:
-            msg.data = self.det2bool(bboxes[0], classes[0]) # [0] because our batch size given to the wrapper is 1
-        
+        msg.data = self.duckie_alert
+
         self.pub_obj_dets.publish(msg)
+
+    def lookout_for_duckies(self):
+        nearest_duckies_px = self.model_wrapper.get_nearest_duckies_px()
+        ped_distance = rospy.get_param("ped_distance",0.3)
+        ped_left = -rospy.get_param("ped_left",0.03)
+        ped_right = rospy.get_param("ped_right",0.03)
+        self.duckie_alert = False
+        self.duckies_around = False
+        nearest_duckies = self.ground_project_segments_px(nearest_duckies_px)
+        for duckie_segment in nearest_duckies:
+            #There is some duckies around!
+            self.duckies_around=True
+            pt1 = duckie_segment[0]
+            pt2 = duckie_segment[1]
+            for pt in [pt1, pt2]:
+                x = pt[0]
+                y = pt[1]
+                #Distance in front of the Duckieboty 
+                #Distance left/right of the Duckiebot
+                if y > ped_left and y < ped_right:
+                    #There is a duckie bot in front of us!
+                    if x < ped_distance:
+                        # We're getting to close!
+                        self.duckie_alert=True
 
     def add_segments(self, yellow_segments, seg_msg, color):
         for yellow_segment in yellow_segments:
