@@ -255,7 +255,7 @@ class LaneControllerNode(DTROS):
         data=lines
         dist=lookup_distance
 
-        ransac = rospy.get_param("speed",True)
+        ransac = rospy.get_param("ransac",False)
 
         #From "controller_exploration" notebook. See it for more details
         x, y = get_xy(data["yellow"])
@@ -263,7 +263,7 @@ class LaneControllerNode(DTROS):
         try:
             #a,b = fit_and_show(x,y, "y")
             a,b = fit(x,y,ransac)
-            yellow_aim_point = get_aim_point_v2(a,b,dist,offset)
+            yellow_aim_point = get_aim_point(a,b,dist,offset)
             #plt.scatter(*yellow_aim_point, marker="X", c="y")
         except ValueError:
             pass
@@ -288,7 +288,7 @@ class LaneControllerNode(DTROS):
             a,b = fit(x_right,y_right,ransac)
             #plt.scatter(0,0, marker="D")
         
-            white_aim_point = get_aim_point_v2(a,b,dist,-offset + rospy.get_param("white_offset",0)) 
+            white_aim_point = get_aim_point(a,b,dist,-offset + rospy.get_param("white_offset",0)) 
             #plt.scatter(*white_aim_point, marker="X", c="k")
         except ValueError:
             pass
@@ -299,7 +299,7 @@ class LaneControllerNode(DTROS):
         a_bez=b_bez=-1
         try:
             a_bez,b_bez = fit(x,y,ransac)
-            bezier_aim_point = get_aim_point_v2(a_bez,b_bez,lookup_distance,offset=0)
+            bezier_aim_point = get_aim_point(a_bez,b_bez,lookup_distance,offset=0)
         except ValueError:
             pass
         
@@ -309,7 +309,7 @@ class LaneControllerNode(DTROS):
         elif yellow_aim_point:
             aim_point = yellow_aim_point
 
-            if white_aim_point and rospy.get_param("yw_average",False):
+            if white_aim_point and rospy.get_param("yw_average",True):
                 aim_point = (
                                 ((yellow_aim_point[0] + white_aim_point[0]) / 2),
                                 ((yellow_aim_point[1] + white_aim_point[1]) / 2)
@@ -334,8 +334,8 @@ class LaneControllerNode(DTROS):
         #
         alpha = np.arctan(aim_point[1]/aim_point[0])
         d_alpha = alpha-self.last_alpha
-        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",15)
-        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",100)
+        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",17)
+        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",150)
 
         self.last_alpha = alpha
 
@@ -344,7 +344,7 @@ class LaneControllerNode(DTROS):
         #norm_speed = max(rospy.get_param("turn_speed",0.7), norm * rospy.get_param("speed",1.0))
         #car_control_msg.v= norm_speed
         #if 
-        car_control_msg.v = rospy.get_param("speed",1)
+        car_control_msg.v = rospy.get_param("speed",0.9)
         if abs(car_control_msg.omega) > rospy.get_param("turn_th",2):
             car_control_msg.v = rospy.get_param("turn_speed",0.7)
 

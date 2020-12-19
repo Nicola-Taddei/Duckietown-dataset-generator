@@ -14,8 +14,9 @@ class Wrapper():
             self.width=320
             self.height=240
         elif model_type=="segmentation":
-            #self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.2012-12-11.onnx")
-            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.onnx")
+            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.2012-12-11.onnx")
+            #self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.onnx")
+            #self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation_real.onnx")
             
             self.width=160
             self.height=120
@@ -57,7 +58,7 @@ class Wrapper():
         return self.get_line_segments_px(self.right_bezier_mask)
 
     def get_nearest_duckies_px(self):
-        return self.get_line_segments_px(self.duckie_mask, min_area=32)
+        return self.get_line_segments_px(self.duckie_mask, min_area=12)
 
     def get_nearest_segments_px(self,mask):
         flip_mask = cv2.flip(mask, 0)
