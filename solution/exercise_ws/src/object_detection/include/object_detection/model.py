@@ -14,7 +14,8 @@ class Wrapper():
             self.width=320
             self.height=240
         elif model_type=="segmentation":
-            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.2012-12-11.onnx")
+            #self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.2012-12-11.onnx")
+            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.onnx")
             self.width=160
             self.height=120
         else:
@@ -36,7 +37,7 @@ class Wrapper():
             self.right_bezier_mask = (self.seg==5).astype(np.uint8)
 
     def get_nearest_duckies_px(self):
-        return self.get_line_segments_px(self.duckie_mask, min_area=12)
+        return self.get_line_segments_px(self.duckie_mask, min_area=16)
         
     def get_seg(self):
         return self.seg
@@ -82,13 +83,16 @@ class Wrapper():
         return segments_px
 
     @staticmethod
-    def get_line_segments_px(mask):
-        contours,_ = cv2.findContours(mask, 1, cv2.CHAIN_APPROX_SIMPLE )
+    def get_line_segments_px(mask, min_area=0 ):
+        contours,_ = cv2.findContours(mask, 1, cv2.CHAIN_APPROX_SIMPLE)
         segments_px = []
         for cnt in contours:
             i=0
             pt1=None
             pt2=None
+            area = cv2.contourArea(cnt)
+            if area<min_area:
+                continue 
             for point in cnt:
                 if i==0:
                     pt1 = tuple(point[0])

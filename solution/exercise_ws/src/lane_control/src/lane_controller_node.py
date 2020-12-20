@@ -174,7 +174,7 @@ class LaneControllerNode(DTROS):
             input_pose_msg (:obj:`LanePose`): Message containing information about the current lane pose.
         """
 
-        self.log("Alive and well")
+        #self.log("Alive and well")
 
         self.segments_msg = segments_msg
 
@@ -264,7 +264,7 @@ class LaneControllerNode(DTROS):
                 #print("bli")
                 #print(a,b)
                 for xval,yval in zip(x,y):
-                    if yval < float(a)*xval+float(b) and yval>0.25:
+                    if yval < float(a)*xval+float(b):
                         x_right.append(xval)
                         y_right.append(yval)
             else:
@@ -314,6 +314,9 @@ class LaneControllerNode(DTROS):
 
         if abs(aim_point[1]) < rospy.get_param("hyst",0.03):
             aim_point = (aim_point[0], 0)
+
+        m = rospy.get_param("m",0.8)
+        self.aim_point = (self.last_aim_point[0]*m + aim_point[0]*(1-m),self.last_aim_point[1]*m + aim_point[1]*(1-m) )
         
         
 
@@ -322,8 +325,8 @@ class LaneControllerNode(DTROS):
         #
         alpha = np.arctan(aim_point[1]/aim_point[0])
         d_alpha = alpha-self.last_alpha
-        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",10)
-        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",100)
+        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",4)
+        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",10)
 
         self.last_alpha = alpha
 
@@ -331,9 +334,9 @@ class LaneControllerNode(DTROS):
         #norm_speed = max(rospy.get_param("turn_speed",0.7), norm * rospy.get_param("speed",1.0))
         #car_control_msg.v= norm_speed
         #if 
-        car_control_msg.v = rospy.get_param("speed",1)
+        car_control_msg.v = rospy.get_param("speed",0.5)
         if abs(car_control_msg.omega) > rospy.get_param("turn_th",2):
-            car_control_msg.v = rospy.get_param("turn_speed",0.7)
+            car_control_msg.v = rospy.get_param("turn_speed",0.2)
 
         self.log(f"v={car_control_msg.v}, alpha = {alpha:.2f} omega = {car_control_msg.omega:.2f}. Aim: {aim_point[0]:.2f},{aim_point[1]:.2f}")
 
