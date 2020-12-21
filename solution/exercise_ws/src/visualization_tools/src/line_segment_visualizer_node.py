@@ -49,7 +49,7 @@ class LineSegmentVisualizer(DTROS):
             "~segment_list_filtered", SegmentList, self.cbSegListFiltered)
         
         self.sub_segmented_seg_list = rospy.Subscriber(
-            "/agent/object_detection_node/seglist_filtered", SegmentList, self.cbSegListFiltered)
+            "object_detection_node/seglist_filtered", SegmentList, self.cbSegListFiltered)
         rospy.loginfo("[%s] Initialzed." % (self.node_name))
 
     def cbSegList(self, seg_list_msg):

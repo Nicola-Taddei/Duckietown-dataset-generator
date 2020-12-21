@@ -20,12 +20,14 @@ from image_processing.ground_projection_geometry import GroundProjectionGeometry
 import cv2
 from object_detection.model import Wrapper
 from cv_bridge import CvBridge
+import time
+
 
 class ObjectDetectionNode(DTROS):
 
     #def __init__(self, node_name, model_type="bezier"):
     def __init__(self, node_name, model_type="segmentation"):
-
+        
         # Initialize the DTROS parent class
         super(ObjectDetectionNode, self).__init__(
             node_name=node_name,
@@ -34,6 +36,8 @@ class ObjectDetectionNode(DTROS):
         self.duckie_alert = False
         self.duckies_around= False
         self.model_type = model_type
+        self.duckie_location = None
+        self.duckie_timer = 0
         if self.model_type=="bezier":
             self.height=320
             self.width=240
@@ -182,6 +186,8 @@ class ObjectDetectionNode(DTROS):
         msg = BoolStamped()
         msg.header = image_msg.header
         msg.data = self.duckie_alert
+        if self.duckie_alert:
+            self.log(f"Warning Duckie Citizen Ahead! Location = {self.duckie_location}")
 
         self.pub_obj_dets.publish(msg)
 
@@ -203,11 +209,13 @@ class ObjectDetectionNode(DTROS):
     
     def lookout_for_duckies(self):
         nearest_duckies_px = self.model_wrapper.get_nearest_duckies_px()
-        ped_distance = rospy.get_param("ped_distance",0.2)
-        ped_left = -rospy.get_param("ped_left",0.075)
-        ped_right = rospy.get_param("ped_right",0.075)
-        self.duckie_alert = False
+        ped_distance = rospy.get_param("ped_distance",0.5)
+        ped_left = -rospy.get_param("ped_left",0.1)
+        ped_right = rospy.get_param("ped_right",0.1)
+        if time.time() > self.duckie_timer + rospy.get_param("ped_timeout",5):
+            self.duckie_alert = False #We almost killed a dukie. We take a break to think about it.
         self.duckies_around = False
+        self.duckie_location = None
         nearest_duckies = self.ground_project_segments_px(nearest_duckies_px)
         for duckie_segment in nearest_duckies:
             #There is some duckies around!
@@ -224,6 +232,8 @@ class ObjectDetectionNode(DTROS):
                     if x < ped_distance:
                         # We're getting to close!
                         self.duckie_alert=True
+                        self.duckie_location = (x,y)
+                        self.duckie_timer = time.time()
       
     def ground_project_segments_px(self, segments_px, right_only=False, xmin=0.0, xmax=1):
         x=[]

@@ -6,7 +6,7 @@ class NoGPUAvailable(Exception):
     pass
 
 class Wrapper():
-    def __init__(self, model_type="bezier"):
+    def __init__(self, model_type="segmentation"):
         #Load the model
         self.model_type=model_type
         if model_type=="bezier":
@@ -15,7 +15,7 @@ class Wrapper():
             self.height=240
         elif model_type=="segmentation":
             #self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.2012-12-11.onnx")
-            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation.onnx")
+            self.sess_ort = ort.InferenceSession("/code/exercise_ws/checkpoints/segmentation_real.onnx")
             self.width=160
             self.height=120
         else:
@@ -37,7 +37,7 @@ class Wrapper():
             self.right_bezier_mask = (self.seg==5).astype(np.uint8)
 
     def get_nearest_duckies_px(self):
-        return self.get_line_segments_px(self.duckie_mask, min_area=16)
+        return self.get_line_segments_px(self.duckie_mask, min_area=8)
         
     def get_seg(self):
         return self.seg
@@ -55,7 +55,10 @@ class Wrapper():
 
     def get_right_bezier_px(self):
         #return self.get_nearest_segments_px(self.right_bezier_mask)
-        return self.get_line_segments_px(self.right_bezier_mask)
+        if self.model_type=="bezier":
+            return self.get_line_segments_px(self.right_bezier_mask)
+        else:
+            return [] #Empty list
 
     def get_nearest_segments_px(self,mask):
         flip_mask = cv2.flip(mask, 0)
