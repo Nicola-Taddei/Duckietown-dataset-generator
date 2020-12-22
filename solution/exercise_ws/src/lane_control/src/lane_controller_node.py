@@ -4,6 +4,7 @@ import rospy
 #import debugpy
 import os
 import json
+import time
 
 #import debugpy
 #debugpy.listen(("localhost", 5678))
@@ -117,6 +118,11 @@ class LaneControllerNode(DTROS):
                                                             self.cbGroundProjectedLineSegments,
                                                             queue_size=1)
 
+        self.sub_duckie_detected = rospy.Subscriber("object_detection_node/duckie_detected_hack",
+                                                    BoolStamped,
+                                                    self.cbDuckieDetected,
+                                                    queue_size=1)
+
         #debugpy.listen(5678)
         self.log("Waiting for debugger attach")
 
@@ -133,6 +139,9 @@ class LaneControllerNode(DTROS):
 
         self.last_aim_point = (0.2, 0)
 
+        self.state = "lane_follow" # Other states : "overtake"
+        self.overtake_timer = time.time()
+
         rospy.set_param("relative_name", 10.0)
 
         if not os.path.exists("/code/exercise_ws/datalog"):
@@ -143,6 +152,16 @@ class LaneControllerNode(DTROS):
         #debugpy.wait_for_client()
         self.log("Initialized")
         #self.log('break on this line')
+
+
+    def cbDuckieDetected(self, duckie_detected_msg):
+        self.duckie_detected_msg= duckie_detected_msg
+        if duckie_detected_msg.data and not self.duckie_detected:
+            self.log("Duckie Detected by the lane controller! Going into Overtake Mode!")
+            self.state="overtake"
+            self.overtake_timer = time.time()
+        self.duckie_detected = duckie_detected_msg.data
+        
 
     def cbLanePoses(self, input_pose_msg):
         """Callback receiving pose messages
@@ -184,7 +203,7 @@ class LaneControllerNode(DTROS):
         relative_name = rospy.get_param("relative_name")
 
         lookup_distance = rospy.get_param("lookup_distance",0.30)
-        offset =  rospy.get_param("offset",0.20)
+        
 
 
         if self.breakpoints_enabled:
@@ -244,14 +263,22 @@ class LaneControllerNode(DTROS):
         white_aim_point = None
         data=lines
         dist=lookup_distance
+        overtake_dist = rospy.get_param("overtake_dist",0.15)
+        offset =  rospy.get_param("offset",0.20)
+        overtake_offset = rospy.get_param("overtake_offset",0.20)
 
         #From "controller_exploration" notebook. See it for more details
         x, y = get_xy(data["yellow"])
+        yellow_overtake_aim_point=None
+        white_overtake_aim_point=None
         #plt.scatter(x,y, c="y")
         try:
             #a,b = fit_and_show(x,y, "y")
             a,b = fit(x,y)
             yellow_aim_point = get_aim_point(a,b,dist,offset)
+            yellow_overtake_aim_point = get_aim_point(a,b,
+            overtake_dist,
+            -overtake_offset)
             #plt.scatter(*yellow_aim_point, marker="X", c="y")
         except ValueError:
             pass
@@ -260,6 +287,8 @@ class LaneControllerNode(DTROS):
             x, y = get_xy(data["white"])
             x_right=[]
             y_right=[]
+            x_left=[]
+            y_left=[]
             if yellow_aim_point:
                 #print("bli")
                 #print(a,b)
@@ -267,9 +296,14 @@ class LaneControllerNode(DTROS):
                     if yval < float(a)*xval+float(b):
                         x_right.append(xval)
                         y_right.append(yval)
+                    else:
+                        x_left.append(xval)
+                        y_left.append(yval)
             else:
                 x_right = x
                 y_right = y
+                x_left = x
+                y_right = x
     
             #plt.scatter(x_right,y_right, c="k")
             #a,b = fit_and_show(x_right,y_right, "k")
@@ -277,6 +311,10 @@ class LaneControllerNode(DTROS):
             #plt.scatter(0,0, marker="D")
         
             white_aim_point = get_aim_point(a,b,dist,-offset + rospy.get_param("white_offset",0)) 
+            
+            a,b = fit(x_left,y_left)
+            white_overtake_aim_point = get_aim_point(a,b,overtake_dist,overtake_offset) 
+
             #plt.scatter(*white_aim_point, marker="X", c="k")
         except ValueError:
             pass
@@ -316,7 +354,26 @@ class LaneControllerNode(DTROS):
             aim_point = (aim_point[0], 0)
 
         m = rospy.get_param("m",0.3)
-        self.aim_point = (self.last_aim_point[0]*m + aim_point[0]*(1-m),self.last_aim_point[1]*m + aim_point[1]*(1-m) )
+        speed = rospy.get_param("speed",0.5)
+        turn_speed = rospy.get_param("turn_speed",0.5)
+        #This is Melisande's Idea, not mine, but it works great!
+        if self.state=="overtake":
+            self.log("Duckie in sight, overtaking!")
+            if yellow_overtake_aim_point:
+                aim_point = yellow_overtake_aim_point
+            else:
+                if white_overtake_aim_point:
+                    aim_point = white_overtake_aim_point
+                else:
+                    aim_point = (0.1,-0.3) #Pivot until you see the yellow line!
+            speed=rospy.get_param("overtake_speed",0.2)
+            turn_speed=speed
+            if time.time() > (self.overtake_timer + rospy.get_param("overtake_timer",10))\
+                and yellow_aim_point and abs(yellow_aim_point[1])<0.15: # #Wait until we see the yellow line! (And we are centered!)
+                self.state="lane_follow"
+                self.log("Going back to lane following mode!")
+        else: #Lane following by defaulté
+            self.aim_point = (self.last_aim_point[0]*m + aim_point[0]*(1-m),self.last_aim_point[1]*m + aim_point[1]*(1-m) )
         
         
 
@@ -325,7 +382,7 @@ class LaneControllerNode(DTROS):
         #
         alpha = np.arctan(aim_point[1]/aim_point[0])
         d_alpha = alpha-self.last_alpha
-        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",6)
+        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",4)
         car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",30)
 
         self.last_alpha = alpha
@@ -334,9 +391,9 @@ class LaneControllerNode(DTROS):
         #norm_speed = max(rospy.get_param("turn_speed",0.7), norm * rospy.get_param("speed",1.0))
         #car_control_msg.v= norm_speed
         #if 
-        car_control_msg.v = rospy.get_param("speed",0.5)
+        car_control_msg.v = speed
         if abs(car_control_msg.omega) > rospy.get_param("turn_th",2):
-            car_control_msg.v = rospy.get_param("turn_speed",0.5)
+            car_control_msg.v = turn_speed
 
         self.log(f"v={car_control_msg.v}, alpha = {alpha:.2f} omega = {car_control_msg.omega:.2f}. Aim: {aim_point[0]:.2f},{aim_point[1]:.2f}")
 

@@ -50,12 +50,20 @@ class ObjectDetectionNode(DTROS):
 
         # Construct publishers
         self.pub_obj_dets = rospy.Publisher(
-            "~duckie_detected",
+            "~duckie_detected_hack",
             BoolStamped,
             queue_size=1,
             dt_topic_type=TopicType.PERCEPTION
         )
 
+        # Construct publishers
+        #self.pub_obj_dets = rospy.Publisher(
+        #    "~duckie_detected",
+        #    BoolStamped,
+        #    queue_size=1,
+        #    dt_topic_type=TopicType.PERCEPTION
+        #)
+        
         # Construct subscribers
         self.sub_image = rospy.Subscriber(
             "~image/compressed",
@@ -209,9 +217,9 @@ class ObjectDetectionNode(DTROS):
     
     def lookout_for_duckies(self):
         nearest_duckies_px = self.model_wrapper.get_nearest_duckies_px()
-        ped_distance = rospy.get_param("ped_distance",0.5)
-        ped_left = -rospy.get_param("ped_left",0.15)
-        ped_right = rospy.get_param("ped_right",0.15)
+        ped_distance = rospy.get_param("ped_distance",0.4)
+        ped_left = -rospy.get_param("ped_left",0.075)
+        ped_right = rospy.get_param("ped_right",0.075)
         if time.time() > self.duckie_timer + rospy.get_param("ped_timeout",5):
             self.duckie_alert = False #We almost killed a dukie. We take a break to think about it.
         self.duckies_around = False
