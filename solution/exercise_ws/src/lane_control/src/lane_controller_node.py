@@ -264,8 +264,8 @@ class LaneControllerNode(DTROS):
         data=lines
         dist=lookup_distance
         overtake_dist = rospy.get_param("overtake_dist",0.15)
-        offset =  rospy.get_param("offset",0.20)
-        overtake_offset = rospy.get_param("overtake_offset",0.20)
+        offset =  rospy.get_param("offset",0.13)
+        overtake_offset = rospy.get_param("overtake_offset",0.13)
 
         #From "controller_exploration" notebook. See it for more details
         x, y = get_xy(data["yellow"])
@@ -353,9 +353,9 @@ class LaneControllerNode(DTROS):
         if abs(aim_point[1]) < rospy.get_param("hyst",0.03):
             aim_point = (aim_point[0], 0)
 
-        m = rospy.get_param("m",0.3)
-        speed = rospy.get_param("speed",0.5)
-        turn_speed = rospy.get_param("turn_speed",0.5)
+        m = rospy.get_param("m",0.8)
+        speed = rospy.get_param("speed",0.3)
+        turn_speed = rospy.get_param("turn_speed",0.3)
         #This is Melisande's Idea, not mine, but it works great!
         if self.state=="overtake":
             self.log("Duckie in sight, overtaking!")
@@ -365,10 +365,10 @@ class LaneControllerNode(DTROS):
                 if white_overtake_aim_point:
                     aim_point = white_overtake_aim_point
                 else:
-                    aim_point = (0.1,-0.3) #Pivot until you see the yellow line!
+                    aim_point = (0.1,-0.1) #Pivot until you see the yellow line!
             speed=rospy.get_param("overtake_speed",0.2)
             turn_speed=speed
-            if time.time() > (self.overtake_timer + rospy.get_param("overtake_timer",10))\
+            if time.time() > (self.overtake_timer + rospy.get_param("overtake_timer",5))\
                 and yellow_aim_point and abs(yellow_aim_point[1])<0.15: # #Wait until we see the yellow line! (And we are centered!)
                 self.state="lane_follow"
                 self.log("Going back to lane following mode!")
@@ -382,8 +382,8 @@ class LaneControllerNode(DTROS):
         #
         alpha = np.arctan(aim_point[1]/aim_point[0])
         d_alpha = alpha-self.last_alpha
-        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",4)
-        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",30)
+        car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",6)
+        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",10)
 
         self.last_alpha = alpha
 

@@ -37,7 +37,7 @@ class Wrapper():
             self.right_bezier_mask = (self.seg==5).astype(np.uint8)
 
     def get_nearest_duckies_px(self):
-        return self.get_line_segments_px(self.duckie_mask, min_area=48)
+        return self.get_line_segments_px(self.duckie_mask, min_area=96)
         
     def get_seg(self):
         return self.seg
