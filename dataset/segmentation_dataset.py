@@ -73,8 +73,8 @@ _CITYSCAPES_INFORMATION = DatasetDescriptor(
 
 _DUCKIETOWN_INFORMATION = DatasetDescriptor(
     splits_to_sizes={
-        'train': 9500,
-        'val': 500,
+        'train': 59000,
+        'val': 9500,
         'test': 1,
     },
     num_classes=6,
