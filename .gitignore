@@ -119,7 +119,8 @@ data
 **/*.pyc
 output/*
 checkpoint/*
-checkpoints
+checkpoints/*
+#checkpoints
 saved_model/*
 saved_model.bak/*
 saved_model.bak2/*
@@ -135,3 +136,13 @@ notebooks/animation/*
 solution/exercise_ws/devel/*
 solution/exercise_ws/datalog/*
 .idea
+segmentation.onnx
+1.png
+5.png
+641.png
+2178.png
+9722.png
+41181.jpg
+sim_28936.jpg
+sim_13226.jpg
+notebooks/gluk.png

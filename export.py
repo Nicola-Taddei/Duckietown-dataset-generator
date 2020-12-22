@@ -11,16 +11,16 @@ flags = tf.app.flags
 
 FLAGS = flags.FLAGS
 
-INPUT_SIZE = [1, 240, 320, 3] #[1, 225, 225, 3] 16 for cityscapes, 120x160 for Rey's Original
+INPUT_SIZE = [1, 120, 160, 3] #[1, 225, 225, 3] 16 for cityscapes, 120x160 for Rey's Original
 NUMBER_OF_CLASSES = 6 #19 for cityscapes
-OUTPUT_STRIDE = 8 #16 for cityscapes, 4 for Rey's original, 8 for JS.
+OUTPUT_STRIDE = 4 #16 for cityscapes, 4 for Rey's original, 8 for JS.
 
 MODEL_VARIANT = 'shufflenet_v2'
 USE_DPC = False
 CHECKPOINT_PATH = './logs/'
 
-WARMUP_STEP = 100
-EVAL_STEP = 1000
+WARMUP_STEP = 10
+EVAL_STEP = 100
 CPU = True
 config = None
 

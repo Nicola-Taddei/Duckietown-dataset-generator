@@ -11,18 +11,18 @@ This models performs pretty well in the Duckietown Simulator too! 75.60% on the 
 
 ## Model zoo
 
-| Checkpoint name                         | Trained on                                          | Uses DPC | Eval OS | Eval scales | Left-right Flip |    mIOU     | File Size |
-| --------------------------------------- | --------------------------------------------------- | :--: | :-----: | :---------: | :-------------: | :---------: | --------: |
-| [shufflenetv2_basic_cityscapes_67_7][1] | MS COCO 2017* + Cityscapes coarse + Cityscapes fine | No |  16    |   \[1.0\]   |       No        | 67.7% (val) |     4.9MB |
-| [shufflenetv2_dpc_cityscapes_71_3][2]   | MS COCO 2017* + Cityscapes coarse + Cityscapes fine | Yes |  16    |   \[1.0\]   |       No        | 71.3% (val) |     6.3MB |
+Please refer to the original repository for pre-trained models.
 
-\* Filtered to include only `person`, `car`, `truck`, `bus`, `train`, `motorcycle`, `bicycle`, `stop sign`, `parking meter` classes and samples that contain over 1000 annotated pixels.
 
 ## Training
 
 To learn more about the available flags you can check `common.py` and the specific script that you are trying to run (e.g. `train.py`).
 
 2-3 epochs of fine-tuning should be enough, more would likely cause overfitting. The model is already pre-trained on Cityscapes, so the final training is basically domain adaptation. 
+
+The "output_stride" parameter can be used to allow this network to work on smaller resolution images. The Network was originally designed to work with 640x480 images, with an output stride of 16. For smaller images, such as the ones we use in Duckietown, the bottleneck is to narrow. Reducing the output stride to 8 for 320x240 and 4 for 160x120 reduce this bottleneck. The only drawback is that those network take as much time as the 640x480 image on lower resolution image. 
+
+Long story short: Next time, we should generate 640x480 datasets, because lowering the resolution will not help!
 
 
 
@@ -99,7 +99,7 @@ python train.py     --model_variant=shufflenet_v2     --tf_initial_checkpoint=./
 
 ### Example evaluation configuration
 
-Duckietown:
+Duckietown "merged_with_real":
 ```sh
 python evaluate.py \
     --model_variant=shufflenet_v2 \
@@ -110,6 +110,18 @@ python evaluate.py \
     --checkpoint_dir=./logs \
     --dataset=duckietown \
     --dataset_dir=./dataset/duckietown2/merged_with_real/tfrecords
+```
+Duckietown "bezier":
+```sh
+python evaluate.py \
+    --model_variant=shufflenet_v2 \
+    --eval_crop_size=240 \
+    --eval_crop_size=320 \
+    --output_stride=8 \
+    --eval_logdir=./logs/eval \
+    --checkpoint_dir=./logs \
+    --dataset=duckietown \
+    --dataset_dir=./dataset/duckietown2/bezier/tfrecords
 ```
 
 
