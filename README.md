@@ -3,6 +3,9 @@ This repository is a fork of the https://github.com/sercant/mobile-segmentation 
 
 This models performs pretty well in the Duckietown Simulator too! 75.60% on the Duckietown Segmentation Dataset.
 
+![Duckie Loop](media/duckie_loop.gif)
+
+
 ## Getting ready
 
 1. Download or generate a "raw" DuckieTown dataset. [Refer to the Duckietown Dataset Generator](dataset_generator/README.md)
