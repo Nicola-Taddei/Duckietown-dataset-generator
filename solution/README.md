@@ -56,7 +56,7 @@ Symptom: Duckiebot has not fear and can crash into objects.
 
 Resolution: Go slower! The perception system is limited by the network latency and CPU power of your machine. Running at 30 FPS on a Desktop allows going faster than running at 12 frames per seconds on a 3 years old laptop. A faster CPU will give the Duckiebot better reflexes. If you have time, do the inference on GPU, this would allow a laptop to process frames much faster, and give better reaction times to the Duckiebot.
 
-## Demo failure demonstration {#demo-Harder_Better_Faster_Stronger-failure}
+## Demo failure demonstration
 
 Here is a video of the Duckiebot going way too fast. It will eventually crash, just a matter of time!
 
