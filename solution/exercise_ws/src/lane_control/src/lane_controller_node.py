@@ -118,7 +118,12 @@ class LaneControllerNode(DTROS):
                                                             self.cbGroundProjectedLineSegments,
                                                             queue_size=1)
 
-        self.sub_duckie_detected = rospy.Subscriber("object_detection_node/duckie_detected_hack",
+        #Disable Duckie avoidance by default. Was not part of the scope of the project, 
+        #but might be useful if someone wants to experiment with it.
+        self.duckie_avoid = rospy.get_param("avoid_duckies", False)
+
+        if self.duckie_avoid:
+            self.sub_duckie_detected = rospy.Subscriber("object_detection_node/duckie_detected_hack",
                                                     BoolStamped,
                                                     self.cbDuckieDetected,
                                                     queue_size=1)
@@ -141,6 +146,7 @@ class LaneControllerNode(DTROS):
 
         self.state = "lane_follow" # Other states : "overtake"
         self.overtake_timer = time.time()
+
 
         rospy.set_param("relative_name", 10.0)
 
@@ -354,9 +360,10 @@ class LaneControllerNode(DTROS):
             aim_point = (aim_point[0], 0)
 
         m = rospy.get_param("m",0.8)
-        speed = rospy.get_param("speed",0.3)
-        turn_speed = rospy.get_param("turn_speed",0.3)
+        speed = rospy.get_param("speed",0.6)
+        turn_speed = rospy.get_param("turn_speed",0.4)
         #This is Melisande's Idea, not mine, but it works great!
+        #The parameter "duckie_avoid" need to be activated for this code to work.
         if self.state=="overtake":
             self.log("Duckie in sight, overtaking!")
             if yellow_overtake_aim_point:
@@ -383,7 +390,7 @@ class LaneControllerNode(DTROS):
         alpha = np.arctan(aim_point[1]/aim_point[0])
         d_alpha = alpha-self.last_alpha
         car_control_msg.omega = np.sin(alpha) * rospy.get_param("K",6)
-        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",10)
+        car_control_msg.omega += np.sin(d_alpha) * rospy.get_param("D",20)
 
         self.last_alpha = alpha
 
