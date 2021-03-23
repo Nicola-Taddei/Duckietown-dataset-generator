@@ -1,7 +1,9 @@
 # DuckieTown adaptation of An efficient solution for semantic segmentation: ShuffleNet V2 with atrous separable convolutions
 This repository is a fork of the https://github.com/sercant/mobile-segmentation repository. They presented a computationally efficient approach to semantic segmentation, while achieving a high mean intersection over union (mIOU), 70.33% on Cityscapes challenge. The network proposed is capable of running real-time on mobile devices.
 
-This models performs pretty well in the Duckietown Simulator too! 75.60% on the Duckietown Segmentation Dataset.
+This models performs pretty well in the Duckietown Simulator too! 75.60% mAP on the Duckietown Segmentation Dataset. The dataset pipeline was adapted to use data from the Duckietown simulator and some real annotated data from a previous team. 
+
+The resulting model was integrated for real-time (30+FPS) inference on CPU using the ONNX runtime. A custom pure-pursuit controller was devised to use the ouput segmentation mask.
 
 ![Duckie Loop](media/duckie_loop.gif)
 
@@ -21,13 +23,11 @@ Please refer to the original repository for pre-trained models.
 
 To learn more about the available flags you can check `common.py` and the specific script that you are trying to run (e.g. `train.py`).
 
-2-3 epochs of fine-tuning should be enough, more would likely cause overfitting. The model is already pre-trained on Cityscapes, so the final training is basically domain adaptation. 
+2-3 epochs of fine-tuning should be enough, more would likely cause overfitting. The model is already pre-trained on Cityscapes, so the final training is basically domain adaptation. This means only a few hours a good old 1070TI GPU! 
 
 The "output_stride" parameter can be used to allow this network to work on smaller resolution images. The Network was originally designed to work with 640x480 images, with an output stride of 16. For smaller images, such as the ones we use in Duckietown, the bottleneck is to narrow. Reducing the output stride to 8 for 320x240 and 4 for 160x120 reduce this bottleneck. The only drawback is that those network take as much time as the 640x480 image on lower resolution image. 
 
 Long story short: Next time, we should generate 640x480 datasets, because lowering the resolution will not help!
-
-
 
 ### Example training configuration
 
@@ -128,7 +128,7 @@ python evaluate.py \
 ```
 
 
-Cityscapes:
+Cityscapes (from original repository):
 ```sh
 python evaluate.py \
     --model_variant=shufflenet_v2 \
