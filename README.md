@@ -2,9 +2,15 @@
 This repository is a fork of the https://github.com/sercant/mobile-segmentation repository. They presented a computationally efficient approach to semantic segmentation, while achieving a high mean intersection over union (mIOU), 70.33% on Cityscapes challenge. The network proposed is capable of running real-time on mobile devices.
 
 This models performs pretty well in the Duckietown Simulator too! 75.60% on the Duckietown Segmentation Dataset.
-
+## Video of the actual duckie making loops.
 ![Duckie Loop](media/duckie_loop.gif)
 
+## Monitoring the segmentation model using ROS
+This is the same loop, but another time in the day. Performance is consistant across different illumination scenerio and robust to backgrounds and outperforms any traditionnal "OpenCV" approach, while staying light weight.
+
+The model was first pre-trained on cityscapes, then trained with 50000 samples of simulation data, and then fine-tuned with a small real dataset of 200 samples. 
+
+![Duckie Segmentation](media/duckie_segmentation.gif)
 
 ## Getting ready
 
