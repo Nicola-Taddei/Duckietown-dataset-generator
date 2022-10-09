@@ -68,6 +68,7 @@ env = DuckietownEnv(
     domain_rand = True,
     frame_skip = args.frame_skip,
     distortion = args.distortion,
+    dynamics_rand = False
 )
 
 env_not_rand = DuckietownEnv(
@@ -78,6 +79,7 @@ env_not_rand = DuckietownEnv(
     domain_rand = False,
     frame_skip = args.frame_skip,
     distortion = args.distortion,
+    dynamics_rand = False
 )
 
 logging.basicConfig()

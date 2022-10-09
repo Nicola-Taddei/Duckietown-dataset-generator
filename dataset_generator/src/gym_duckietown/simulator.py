@@ -182,6 +182,7 @@ class Simulator(gym.Env):
     step_count: int
     timestamp: float
     np_random: RandomState
+    np_random2: RandomState
     grid: List[TileDict]
 
     def __init__(
@@ -521,7 +522,7 @@ class Simulator(gym.Env):
                 tile = self.start_tile
             else:
                 # Select a random drivable tile to start on
-                tile_idx = self.np_random.randint(0, len(self.drivable_tiles))
+                tile_idx = self.np_random2.randint(0, len(self.drivable_tiles))
                 tile = self.drivable_tiles[tile_idx]
 
         # If the map specifies a starting pose
@@ -542,12 +543,12 @@ class Simulator(gym.Env):
                 i, j = tile["coords"]
 
                 # Choose a random position on this tile
-                x = self.np_random.uniform(i, i + 1) * self.road_tile_size
-                z = self.np_random.uniform(j, j + 1) * self.road_tile_size
+                x = self.np_random2.uniform(i, i + 1) * self.road_tile_size
+                z = self.np_random2.uniform(j, j + 1) * self.road_tile_size
                 propose_pos = np.array([x, 0, z])
 
                 # Choose a random direction
-                propose_angle = self.np_random.uniform(0, 2 * math.pi)
+                propose_angle = self.np_random2.uniform(0, 2 * math.pi)
 
                 # logger.debug('Sampled %s %s angle %s' % (propose_pos[0],
                 #                                          propose_pos[1],
@@ -810,6 +811,7 @@ class Simulator(gym.Env):
 
     def seed(self, seed=None):
         self.np_random, _ = seeding.np_random(seed)
+        self.np_random_for_pos, _ = seeding.np_random(seed)
         return [seed]
 
     def _set_tile(self, i: int, j: int, tile: TileDict) -> None:
