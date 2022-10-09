@@ -99,38 +99,38 @@ if not os.path.exists(args.dataset_path):
 if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier")):
     os.makedirs(os.path.join(args.dataset_path, "wo_bezier"))
 
-if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier", 'labels')):
-    os.makedirs(os.path.join(args.dataset_path, "wo_bezier", 'labels'))
+if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier", 'labels_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "wo_bezier", 'labels_rand'))
 
-if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier", 'rgb_orig')):
-    os.makedirs(os.path.join(args.dataset_path, "wo_bezier", 'rgb_orig'))
+if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier", 'rgb_orig_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "wo_bezier", 'rgb_orig_rand'))
 
-if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier", 'rgb_ss')):
-    os.makedirs(os.path.join(args.dataset_path, "wo_bezier", 'rgb_ss'))
+if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier", 'rgb_ss_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "wo_bezier", 'rgb_ss_rand'))
 
 if not os.path.exists(os.path.join(args.dataset_path, "w_bezier")):
     os.makedirs(os.path.join(args.dataset_path, "w_bezier"))
 
-if not os.path.exists(os.path.join(args.dataset_path, "w_bezier", 'labels')):
-    os.makedirs(os.path.join(args.dataset_path, "w_bezier", 'labels'))
+if not os.path.exists(os.path.join(args.dataset_path, "w_bezier", 'labels_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "w_bezier", 'labels_rand'))
 
-if not os.path.exists(os.path.join(args.dataset_path, "w_bezier", 'rgb_orig')):
-    os.makedirs(os.path.join(args.dataset_path, "w_bezier", 'rgb_orig'))
+if not os.path.exists(os.path.join(args.dataset_path, "w_bezier", 'rgb_orig_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "w_bezier", 'rgb_orig_rand'))
 
-if not os.path.exists(os.path.join(args.dataset_path, "w_bezier", 'rgb_ss')):
-    os.makedirs(os.path.join(args.dataset_path, "w_bezier", 'rgb_ss'))
+if not os.path.exists(os.path.join(args.dataset_path, "w_bezier", 'rgb_ss_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "w_bezier", 'rgb_ss_rand'))
 
 if not os.path.exists(os.path.join(args.dataset_path, "bezier_only")):
     os.makedirs(os.path.join(args.dataset_path, "bezier_only"))
 
-if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'labels')):
-    os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'labels'))
+if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'labels_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'labels_rand'))
 
-if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_orig')):
-    os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'rgb_orig'))
+if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_orig_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'rgb_orig_rand'))
 
-if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss')):
-    os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss'))
+if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss_rand'))
 
 # without domain randomization
 
