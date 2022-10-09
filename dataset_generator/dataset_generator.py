@@ -7,6 +7,15 @@ This script allows you to manually control the simulator or Duckiebot
 using the keyboard arrows.
 """
 
+import pyvirtualdisplay
+
+
+_display = pyvirtualdisplay.Display(visible=False,  # use False with Xvfb
+                                    size=(1400, 900))
+_ = _display.start()
+
+import matplotlib.pyplot as plt
+
 from gym_duckietown.simulator import Simulator
 from pyglet import app, clock
 from pyglet.window import key
@@ -27,34 +36,49 @@ import cv2 as cv
 from gym_duckietown.objects import WorldObj
 from gym_duckietown.objmesh import ObjMesh
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--env-name', default=None)
-parser.add_argument('--map-name', default='udem1')
-parser.add_argument('--distortion', default=False, action='store_true')
-parser.add_argument('--draw-curve', action='store_true', help='draw the lane following curve')
-parser.add_argument('--draw-bbox', action='store_true', help='draw collision detection bounding boxes')
-parser.add_argument('--domain-rand', action='store_true', help='enable domain randomization')
-parser.add_argument('--frame-skip', default=1, type=int, help='number of frames to skip')
-parser.add_argument('--seed', default=1, type=int, help='seed')
-parser.add_argument('--dataset-size', default=50, type=int, help='number of images to generate')
-parser.add_argument('--dataset-path', default='datasets/image_' + datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '/', help='location to save the dataset')
-parser.add_argument('--compress', action='store_true', help='save the images as a series of png pictures')
-parser.add_argument('--split', default=2000, type=int, help='number of images per file (if used without --compress)')
-parser.add_argument('--resize', default=-1, type=int, help='size reduction factor (e.g. use 4 for 120x160)')
-args = parser.parse_args()
 
-if args.env_name and args.env_name.find('Duckietown') != -1:
-    env = DuckietownEnv(
-        seed = args.seed,
-        map_name = args.map_name,
-        draw_curve = args.draw_curve,
-        draw_bbox = args.draw_bbox,
-        domain_rand = args.domain_rand,
-        frame_skip = args.frame_skip,
-        distortion = args.distortion,
-    )
-else:
-    env = gym.make(args.env_name)
+class tmp():
+    def __init__(self):
+        self.env_name = None
+        self.map_name = 'udem1'
+        self.distortion = False
+        self.draw_curve = False
+        self.draw_bbox = False
+        self.domain_rand = True
+        self.frame_skip = 1
+        self.seed = 2
+        self.dataset_size = 3
+        self.dataset_path = '../dataset/images'
+        self.compress = False
+        self.split = 2000
+        self.resize = -1
+
+args = tmp()
+
+args.env_name = 'Duckietown-udem1-v0'
+args.map_name = 'loop_empty'
+args.dataset_size = 3
+args.resize = 2
+
+env = DuckietownEnv(
+    seed = args.seed,
+    map_name = args.map_name,
+    draw_curve = args.draw_curve,
+    draw_bbox = args.draw_bbox,
+    domain_rand = True,
+    frame_skip = args.frame_skip,
+    distortion = args.distortion,
+)
+
+env_not_rand = DuckietownEnv(
+    seed = args.seed,
+    map_name = args.map_name,
+    draw_curve = args.draw_curve,
+    draw_bbox = args.draw_bbox,
+    domain_rand = False,
+    frame_skip = args.frame_skip,
+    distortion = args.distortion,
+)
 
 logging.basicConfig()
 logger = logging.getLogger('gym-duckietown')
@@ -108,122 +132,50 @@ if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_orig')
 if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss')):
     os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss'))
 
+# without domain randomization
+
+if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier")):
+    os.makedirs(os.path.join(args.dataset_path, "wo_bezier"))
+
+if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier", 'labels_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "wo_bezier", 'labels_not_rand'))
+
+if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier", 'rgb_orig_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "wo_bezier", 'rgb_orig_not_rand'))
+
+if not os.path.exists(os.path.join(args.dataset_path, "wo_bezier", 'rgb_ss_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "wo_bezier", 'rgb_ss_not_rand'))
+
+if not os.path.exists(os.path.join(args.dataset_path, "w_bezier")):
+    os.makedirs(os.path.join(args.dataset_path, "w_bezier"))
+
+if not os.path.exists(os.path.join(args.dataset_path, "w_bezier", 'labels_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "w_bezier", 'labels_not_rand'))
+
+if not os.path.exists(os.path.join(args.dataset_path, "w_bezier", 'rgb_orig_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "w_bezier", 'rgb_orig_not_rand'))
+
+if not os.path.exists(os.path.join(args.dataset_path, "w_bezier", 'rgb_ss_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "w_bezier", 'rgb_ss_not_rand'))
+
+if not os.path.exists(os.path.join(args.dataset_path, "bezier_only")):
+    os.makedirs(os.path.join(args.dataset_path, "bezier_only"))
+
+if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'labels_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'labels_not_rand'))
+
+if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_orig_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'rgb_orig_not_rand'))
+
+if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss_not_rand'))
+
 env.reset()
 env.render()
+env_not_rand.reset()
+env_not_rand.render()
 
-# find last index of images saved in dataset
-idx = 0
-while os.path.exists(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_orig', str(idx) + ".png")):
-    idx += 1
 
-assert isinstance(env.unwrapped, Simulator)
-
-@env.unwrapped.window.event
-def on_key_press(symbol, modifiers):
-    """
-    This handler processes keyboard commands that control the simulation
-    """
-
-    global idx
-
-    if symbol == key.BACKSPACE or symbol == key.SLASH:
-        # Reset environment
-        env.reset()
-        env.render()
-        return
-    elif symbol == key.ESCAPE:
-        # Close duckiebot-gym
-        env.close()
-        sys.exit(0)
-
-    elif symbol == key.P:
-        # Reset environment
-        env.reset()
-        print("env reset")
-
-    elif symbol == key.L:
-        # Print Lane position
-        print("cur_pos")
-        print(env.cur_pos)
-        print("cur_angle")
-        print(env.cur_angle)
-        print("lane position")
-        print(env.get_lane_pos2(env.cur_pos, env.cur_angle))
-        # env.cur_pos = np.array([0.0, 0.0, 0.0])
-        # env.cur_angle = 0.0
-
-    elif symbol == key.N:
-        # turn left
-        env.cur_angle+=1
-        env.draw_curve = False
-
-    elif symbol == key.M:
-        # turn right
-        env.cur_angle+=-1
-
-    elif symbol == key.R:
-        # generate semantic segmentation (with and without bezier) for specific image seen
-        env.reset()
-        print("env reset")
-        env.draw_curve = True
-        obs_w = env.render_obs()
-        env.draw_curve = False
-        obs_wo = env.render_obs()
-        obs_ss = env.render_obs(segment=True)
-        if args.resize != -1:
-            height = int(obs_w.shape[0] * (1/args.resize))
-            width = int(obs_w.shape[1] * (1/args.resize))
-            obs_w = cv.resize(obs_w, (width, height), interpolation = cv.INTER_AREA)
-            obs_wo = cv.resize(obs_wo, (width, height), interpolation=cv.INTER_AREA)
-            obs_ss = cv.resize(obs_ss, (width, height), interpolation=cv.INTER_AREA)
-
-        obs_diff = obs_w-obs_wo
-        obs_diff, skip_it = alter_bezier(obs_diff)
-        imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_orig',  str(idx) + ".png"), obs_wo)
-        imsave(os.path.join(args.dataset_path, 'w_bezier', 'rgb_orig',  str(idx) + ".png"), obs_wo)
-        imsave(os.path.join(args.dataset_path, 'bezier_only', 'rgb_orig', str(idx) + ".png"), obs_wo)
-        imsave(os.path.join(args.dataset_path, 'bezier_only', 'rgb_ss', str(idx) + '_seg' + ".png"), obs_diff)
-        save_ss(os.path.join(args.dataset_path, 'bezier_only', 'labels', str(idx) + ".npy"), obs_diff)
-        obs_ss_w_bez, obs_ss_wo_bez = alter_ss(obs_ss, obs_diff)
-        imsave(os.path.join(args.dataset_path, 'w_bezier', 'rgb_ss', str(idx) + '_seg' + ".png"), obs_ss_w_bez)
-        save_ss(os.path.join(args.dataset_path, 'w_bezier', 'labels', str(idx) + ".npy"), obs_ss_w_bez)
-        imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_ss', str(idx) + '_seg' + ".png"), obs_ss_wo_bez)
-        save_ss(os.path.join(args.dataset_path, 'wo_bezier', 'labels', str(idx) + ".npy"), obs_ss_wo_bez)
-        idx += 1
-
-    elif symbol == key.A:
-        # generate semantic segmentation (with and without bezier) for the dataset size requested (default: 50)
-        while idx <= args.dataset_size -1:
-            env.reset()
-            print("env reset")
-            env.draw_curve = True
-            obs_w = env.render_obs()
-            env.draw_curve = False
-            obs_wo = env.render_obs()
-            obs_ss = env.render_obs(segment=True)
-            if args.resize != -1:
-                height = int(obs_w.shape[0] * (1/args.resize))
-                width = int(obs_w.shape[1] * (1/args.resize))
-                obs_w = cv.resize(obs_w, (width, height), interpolation = cv.INTER_AREA)
-                obs_wo = cv.resize(obs_wo, (width, height), interpolation=cv.INTER_AREA)
-                obs_ss = cv.resize(obs_ss, (width, height), interpolation=cv.INTER_AREA)
-
-            print(idx)
-            obs_diff = obs_w-obs_wo
-            obs_diff, skip_it = alter_bezier(obs_diff)
-            if not skip_it:
-                imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_orig',  str(idx) + ".png"), obs_wo)
-                imsave(os.path.join(args.dataset_path, 'w_bezier', 'rgb_orig',  str(idx) + ".png"), obs_wo)
-                imsave(os.path.join(args.dataset_path, 'bezier_only', 'rgb_orig', str(idx) + ".png"), obs_wo)
-                imsave(os.path.join(args.dataset_path, 'bezier_only', 'rgb_ss', str(idx) + '_seg' + ".png"), obs_diff)
-                save_ss(os.path.join(args.dataset_path, 'bezier_only', 'labels', str(idx) + ".npy"), obs_diff)
-                obs_ss_w_bez, obs_ss_wo_bez = alter_ss(obs_ss, obs_diff)
-                imsave(os.path.join(args.dataset_path, 'w_bezier', 'rgb_ss', str(idx) + '_seg' + ".png"), obs_ss_w_bez)
-                save_ss(os.path.join(args.dataset_path, 'w_bezier', 'labels', str(idx) + ".npy"), obs_ss_w_bez)
-                imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_ss', str(idx) + '_seg' + ".png"), obs_ss_wo_bez)
-                save_ss(os.path.join(args.dataset_path, 'wo_bezier', 'labels', str(idx) + ".npy"), obs_ss_wo_bez)
-
-                idx += 1
 
 def update(dt):
     env.render("free_cam")
@@ -542,8 +494,59 @@ def alter_ss(obs_ss, obs_diff):
     return obs_ss3, obs_ss2
 
 
-# Main event loop
-clock.schedule_interval(update, 1.0 / env.unwrapped.frame_rate)
-app.run()
+
+
+
+
+# find last index of images saved in dataset
+idx = 0
+
+def generate(env, suff):
+    idx = 0
+    global args
+
+    while idx <= args.dataset_size -1:
+        env.reset()
+        print("env reset")
+        env.draw_curve = True
+        obs_w = env.render_obs()
+        env.draw_curve = False
+        obs_wo = env.render_obs()
+        obs_ss = env.render_obs(segment=True)
+        if args.resize != -1:
+            height = int(obs_w.shape[0] * (1/args.resize))
+            width = int(obs_w.shape[1] * (1/args.resize))
+            obs_w = cv.resize(obs_w, (width, height), interpolation = cv.INTER_AREA)
+            obs_wo = cv.resize(obs_wo, (width, height), interpolation=cv.INTER_AREA)
+            obs_ss = cv.resize(obs_ss, (width, height), interpolation=cv.INTER_AREA)
+
+        print(idx)
+        obs_diff = obs_w-obs_wo
+        obs_diff, skip_it = alter_bezier(obs_diff)
+        if not skip_it:
+            plt.imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_orig_' + suff,  str(idx) + ".png"), obs_wo)
+            plt.figure()
+            plt.imshow(obs_wo)
+            plt.imsave(os.path.join(args.dataset_path, 'w_bezier', 'rgb_orig_' + suff,  str(idx) + ".png"), obs_wo)
+            plt.imsave(os.path.join(args.dataset_path, 'bezier_only', 'rgb_orig_' + suff, str(idx) + ".png"), obs_wo)
+            plt.imsave(os.path.join(args.dataset_path, 'bezier_only', 'rgb_ss_' + suff, str(idx) + '_seg' + ".png"), obs_diff)
+            plt.imshow(obs_diff)
+            save_ss(os.path.join(args.dataset_path, 'bezier_only', 'labels_' + suff, str(idx) + ".npy"), obs_diff)
+            obs_ss_w_bez, obs_ss_wo_bez = alter_ss(obs_ss, obs_diff)
+            plt.imsave(os.path.join(args.dataset_path, 'w_bezier', 'rgb_ss_' + suff, str(idx) + '_seg' + ".png"), obs_ss_w_bez)
+            plt.imshow(obs_ss_w_bez)
+            save_ss(os.path.join(args.dataset_path, 'w_bezier', 'labels_' + suff, str(idx) + ".npy"), obs_ss_w_bez)
+            plt.imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_ss_' +  suff, str(idx) + '_seg' + ".png"), obs_ss_wo_bez)
+            save_ss(os.path.join(args.dataset_path, 'wo_bezier', 'labels_' + suff, str(idx) + ".npy"), obs_ss_wo_bez)
+
+        idx += 1
+
+
+generate(env, 'rand') # images with domain randomization on
+
+generate(env_not_rand, 'not_rand') # images with domain randomization off
+
+
 env.close()
+env_not_rand.close()
 
