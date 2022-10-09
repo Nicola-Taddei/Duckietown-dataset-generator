@@ -59,8 +59,8 @@ args.env_name = 'Duckietown-udem1-v0'
 args.map_name = 'loop_empty'
 args.resize = 2
 
-my_seed = sys.argv[0]
-my_dim = sys.argv[1]
+my_seed = sys.argv[1]
+my_dim = sys.argv[2]
 
 args.dataset_size = my_dim
 
