@@ -479,7 +479,8 @@ class Simulator(gym.Env):
             verts += [p[0], p[1], p[2]]
             colors += [c[0], c[1], c[2]]
 
-        self.tri_vlist = pyglet.graphics.vertex_list(3 * numTris, ("v3f", verts), ("c3f", colors))
+        if self.domain_rand:
+            self.tri_vlist = pyglet.graphics.vertex_list(3 * numTris, ("v3f", verts), ("c3f", colors))
 
         # Randomize tile parameters
         for tile in self.grid:
@@ -500,7 +501,10 @@ class Simulator(gym.Env):
         # Randomize object parameters
         for obj in self.objects:
             # Randomize the object color
-            obj.color = self._perturb([1, 1, 1], 0.3)
+            if self.domain_rand:
+                obj.color = self._perturb([1, 1, 1], 0.3)
+            else:
+                obj.color = [1,1,1]
 
             # Randomize whether the object is visible or not
             if obj.optional and self.domain_rand:
