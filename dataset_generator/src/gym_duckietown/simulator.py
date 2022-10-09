@@ -811,7 +811,7 @@ class Simulator(gym.Env):
 
     def seed(self, seed=None):
         self.np_random, _ = seeding.np_random(seed)
-        self.np_random_for_pos, _ = seeding.np_random(seed)
+        self.np_random2, _ = seeding.np_random(seed)
         return [seed]
 
     def _set_tile(self, i: int, j: int, tile: TileDict) -> None:
