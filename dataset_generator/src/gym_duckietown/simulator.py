@@ -472,6 +472,8 @@ class Simulator(gym.Env):
         # Create the vertex list for the ground/noise triangles
         # These are distractors, junk on the floor
         numTris = self.num_tris_distractors
+        if not self.domain_rand:
+            numTris = 0
         verts = []
         colors = []
         for _ in range(0, 3 * numTris):
@@ -481,8 +483,7 @@ class Simulator(gym.Env):
             verts += [p[0], p[1], p[2]]
             colors += [c[0], c[1], c[2]]
 
-        if self.domain_rand:
-            self.tri_vlist = pyglet.graphics.vertex_list(3 * numTris, ("v3f", verts), ("c3f", colors))
+        self.tri_vlist = pyglet.graphics.vertex_list(3 * numTris, ("v3f", verts), ("c3f", colors))
 
         # Randomize tile parameters
         for tile in self.grid:
