@@ -57,11 +57,15 @@ args = tmp()
 
 args.env_name = 'Duckietown-udem1-v0'
 args.map_name = 'loop_empty'
-args.dataset_size = 3
 args.resize = 2
 
+my_seed = sys.argv[0]
+my_dim = sys.argv[1]
+
+args.dataset_size = my_dim
+
 env = DuckietownEnv(
-    seed = args.seed,
+    seed = my_seed,
     map_name = args.map_name,
     draw_curve = args.draw_curve,
     draw_bbox = args.draw_bbox,
@@ -72,7 +76,7 @@ env = DuckietownEnv(
 )
 
 env_not_rand = DuckietownEnv(
-    seed = args.seed,
+    seed = my_seed,
     map_name = args.map_name,
     draw_curve = args.draw_curve,
     draw_bbox = args.draw_bbox,
