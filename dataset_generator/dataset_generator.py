@@ -525,6 +525,7 @@ def generate(env, suff):
         print(idx)
         obs_diff = obs_w-obs_wo
         obs_diff, skip_it = alter_bezier(obs_diff)
+        print(skip_it)
         if not skip_it:
             plt.imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_orig_' + suff,  str(idx) + ".png"), obs_wo)
             plt.figure()
