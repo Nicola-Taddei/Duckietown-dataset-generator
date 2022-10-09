@@ -430,9 +430,11 @@ class Simulator(gym.Env):
             light_pos = [-40, 200, 100]
 
         ambient = np.array([0.50, 0.50, 0.50]) * DIM
-        ambient = self._perturb(ambient, 0.3)
+        if self.domain_rand:
+            ambient = self._perturb(ambient, 0.3)
         diffuse = np.array([0.70, 0.70, 0.70]) * DIM
-        diffuse = self._perturb(diffuse, 0.99)
+        if self.domain_rand:
+            diffuse = self._perturb(diffuse, 0.99)
 
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, (gl.GLfloat * 4)(*light_pos))
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_AMBIENT, (gl.GLfloat * 4)(*ambient))
