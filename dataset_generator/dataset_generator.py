@@ -99,6 +99,14 @@ image_count = 0
 
 
 # Creating dataset directories if they do not exist
+
+if not os.path.exists(os.path.join(args.dataset_path, 'rgb_ss')):
+    os.makedirs(os.path.join(args.dataset_path, 'rgb_ss'))
+
+if not os.path.exists(os.path.join(args.dataset_path, 'rgb_orig')):
+    os.makedirs(os.path.join(args.dataset_path, 'rgb_orig'))
+
+'''
 if not os.path.exists(args.dataset_path):
     os.makedirs(args.dataset_path)
 
@@ -175,6 +183,7 @@ if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_orig_n
 
 if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss_not_rand')):
     os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss_not_rand'))
+'''
 
 env.reset()
 env.render()
@@ -507,13 +516,14 @@ def alter_ss(obs_ss, obs_diff):
 # find last index of images saved in dataset
 idx = 0
 
-def generate(env, suff):
+def generate(env, env_rand):
     idx = 0
     global args
 
     while idx <= args.dataset_size -1:
+        # not rand
         env.reset()
-        print("env reset")
+        print("env_not_rand reset")
         env.draw_curve = True
         obs_w = env.render_obs()
         env.draw_curve = False
@@ -526,11 +536,30 @@ def generate(env, suff):
             obs_wo = cv.resize(obs_wo, (width, height), interpolation=cv.INTER_AREA)
             obs_ss = cv.resize(obs_ss, (width, height), interpolation=cv.INTER_AREA)
 
+        # rand
+        env_rand.reset()
+        print("env_rand reset")
+        env_rand.draw_curve = True
+        obs_w_rand = env_rand.render_obs()
+        env_rand.draw_curve = False
+        obs_wo_rand = env_rand.render_obs()
+        obs_ss_rand = env_rand.render_obs(segment=True)
+        if args.resize != -1:
+            height_rand = int(obs_w_rand.shape[0] * (1/args.resize))
+            width_rand = int(obs_w_rand.shape[1] * (1/args.resize))
+            obs_w_rand = cv.resize(obs_w_rand, (width_rand, height_rand), interpolation = cv.INTER_AREA)
+            obs_wo_rand = cv.resize(obs_wo_rand, (width_rand, height_rand), interpolation=cv.INTER_AREA)
+            obs_ss_rand = cv.resize(obs_ss_rand, (width_rand, height_rand), interpolation=cv.INTER_AREA)
+
         print(idx)
         obs_diff = obs_w-obs_wo
         obs_diff, skip_it = alter_bezier(obs_diff)
-        print(skip_it)
-        if not skip_it:
+
+        if not skip_it:    #we care about accuracy only for non randomized images
+            plt.imsave(os.path.join(args.dataset_path, 'rgb_ss', str(idx) + '_seg' + ".png"), obs_diff)
+            plt.imsave(os.path.join(args.dataset_path, 'rgb_orig',  str(idx) + ".png"), obs_wo_rand)
+
+            '''
             plt.imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_orig_' + suff,  str(idx) + ".png"), obs_wo)
             plt.imsave(os.path.join(args.dataset_path, 'w_bezier', 'rgb_orig_' + suff,  str(idx) + ".png"), obs_wo)
             plt.imsave(os.path.join(args.dataset_path, 'bezier_only', 'rgb_orig_' + suff, str(idx) + ".png"), obs_wo)
@@ -541,13 +570,12 @@ def generate(env, suff):
             save_ss(os.path.join(args.dataset_path, 'w_bezier', 'labels_' + suff, str(idx) + ".npy"), obs_ss_w_bez)
             plt.imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_ss_' +  suff, str(idx) + '_seg' + ".png"), obs_ss_wo_bez)
             save_ss(os.path.join(args.dataset_path, 'wo_bezier', 'labels_' + suff, str(idx) + ".npy"), obs_ss_wo_bez)
+            '''
 
         idx += 1
 
 
-generate(env, 'rand') # images with domain randomization on
-
-generate(env_not_rand, 'not_rand') # images with domain randomization off
+generate(env_not_rand, env) # images with domain randomization on
 
 
 env.close()
