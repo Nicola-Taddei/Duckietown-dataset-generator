@@ -38,46 +38,19 @@ Then
 pip3 install -e .
 ```
 
-## Genrating a dataset
+## Generating a dataset
 
-It was used for generating the semantic segmentation dataset for this project. The script 
-`dataset_generator.py` was adapted from `manual_control.py`, and used for generating a 10,000 image semantic segmentation
-dataset, using the following command: 
+Open *dataset_generator_notebook.ipynb* in Colab
 
-`python3 dataset_generator.py --env-name 'Duckietown-udem1-v0' --map-name 'loop_empty' --dataset-size 10000 --resize 2`
-
-Once in the simulator, the following keys can be used to launch the following effects: 
-  - P: Reset the environment
-  - L: Print the lane pose information
-  - N: Turn left
-  - M: Turn Right
-  - R: Extract image and semantic segmenation annotations for observation
-  - A: Automatically extract the desired number of images (--dataset-size) by reseting the environment and extracting the annotations each time.
-
-The dataset appears in the folder **./datasets/image_XXXXX**, with the following folder structure: 
-
+Modify the line 
 ```
-image_XXXX_XX_XX_XX_XX_XX
-  ├──'bezier_only'				
-  |      ├──labels				  
-  |      |   ├──0.npy			
-  |      |   ├──1.npy			 
-  |      |   └──...					 				 
-  |      ├──rgb_orig				
-  |      |   ├──0.png		
-  |      |   ├──1.png			 
-  |      |   └──...							    	
-  |      └──rgb_ss			
-  |          ├──0_seg.png		
-  |          ├──1_seg.png			 
-  |          └──...
-  ├──'w_bezier'
-  |      └──...	  
-  └──'wo_bezier'
-         └──...	  
+python3 dataset_generator.py 1 10
+```
+according to this syntax
+```
+python3 dataset_generator.py seed number_of_samples
 ```
 
-The folder **bezier_only** contains the semantic segmentation annotations for only the left and right lane classes. 
-The folder **w_bezier** contains the annotations for left and right bezier classes, as well as duckies, white lines
-and yellow lines. The folder **wo_bezier** contains only the duckies, white lines and yellow lines. 
+The dataset will be saved in your Google Drive in a folder named *images*
 
+:warning: You will be sked to give Colab your permission to access Drive. This will happen at the end of dataset generation. It could be useful to give this permission before running the script.
