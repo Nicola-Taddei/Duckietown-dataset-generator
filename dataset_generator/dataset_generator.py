@@ -556,7 +556,8 @@ def generate(env, env_rand):
         obs_diff, skip_it = alter_bezier(obs_diff)
 
         if not skip_it:    #we care about accuracy only for non randomized images
-            plt.imsave(os.path.join(args.dataset_path, 'rgb_ss', str(idx) + '_seg' + ".png"), obs_diff)
+            obs_ss_w_bez, obs_ss_wo_bez = alter_ss(obs_ss, obs_diff)
+            plt.imsave(os.path.join(args.dataset_path, 'rgb_ss', str(idx) + '_seg' + ".png"), obs_ss_wo_bez)
             plt.imsave(os.path.join(args.dataset_path, 'rgb_orig',  str(idx) + ".png"), obs_wo_rand)
 
             '''
