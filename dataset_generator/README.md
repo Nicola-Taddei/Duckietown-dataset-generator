@@ -53,4 +53,4 @@ python3 dataset_generator.py seed number_of_samples
 
 The dataset will be saved in your Google Drive in a folder named *images*
 
-:warning: You will be sked to give Colab your permission to access Drive. This will happen at the end of dataset generation. It could be useful to give this permission before running the script.
+:warning: You will be asked to give Colab your permission to access Drive. This will happen a few seconds after the launch command is given. 
