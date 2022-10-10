@@ -7,10 +7,6 @@ This script allows you to manually control the simulator or Duckiebot
 using the keyboard arrows.
 """
 
-from google.colab import drive
-drive.mount('/content/gdrive')
-# now we can see Drive as local
-
 import pyvirtualdisplay
 
 
@@ -52,7 +48,7 @@ class tmp():
         self.frame_skip = 1
         self.seed = 2
         self.dataset_size = 3
-        self.dataset_path = '/content/gdrive'    #'../dataset/images'
+        self.dataset_path = '../dataset/images'
         self.compress = False
         self.split = 2000
         self.resize = -1
@@ -560,7 +556,4 @@ generate(env_not_rand, 'not_rand') # images with domain randomization off
 
 env.close()
 env_not_rand.close()
-
-# save every local change to Drive
-drive.flush_and_unmount()
 
