@@ -103,8 +103,11 @@ image_count = 0
 if not os.path.exists(os.path.join(args.dataset_path, 'rgb_ss')):
     os.makedirs(os.path.join(args.dataset_path, 'rgb_ss'))
 
-if not os.path.exists(os.path.join(args.dataset_path, 'rgb_orig')):
-    os.makedirs(os.path.join(args.dataset_path, 'rgb_orig'))
+if not os.path.exists(os.path.join(args.dataset_path, 'rgb_orig_not_rand')):
+    os.makedirs(os.path.join(args.dataset_path, 'rgb_orig_not_rand'))
+
+if not os.path.exists(os.path.join(args.dataset_path, 'rgb_orig_rand')):
+    os.makedirs(os.path.join(args.dataset_path, 'rgb_orig_rand'))
 
 '''
 if not os.path.exists(args.dataset_path):
@@ -558,7 +561,8 @@ def generate(env, env_rand):
         if not skip_it:    #we care about accuracy only for non randomized images
             obs_ss_w_bez, obs_ss_wo_bez = alter_ss(obs_ss, obs_diff)
             plt.imsave(os.path.join(args.dataset_path, 'rgb_ss', str(idx) + '_seg' + ".png"), obs_ss_wo_bez)
-            plt.imsave(os.path.join(args.dataset_path, 'rgb_orig',  str(idx) + ".png"), obs_wo_rand)
+            plt.imsave(os.path.join(args.dataset_path, 'rgb_orig_rand',  str(idx) + ".png"), obs_wo_rand)
+            plt.imsave(os.path.join(args.dataset_path, 'rgb_orig_not_rand',  str(idx) + ".png"), obs_wo)
 
             '''
             plt.imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_orig_' + suff,  str(idx) + ".png"), obs_wo)
