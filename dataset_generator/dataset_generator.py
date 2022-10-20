@@ -48,7 +48,7 @@ class tmp():
         self.frame_skip = 1
         self.seed = 2
         self.dataset_size = 50
-        self.dataset_path = '../dataset/images_with_camion'
+        self.dataset_path = '../dataset/images_udem1'
         self.compress = False
         self.split = 2000
         self.resize = -1
@@ -56,7 +56,7 @@ class tmp():
 args = tmp()
 
 args.env_name = 'Duckietown-udem1-v0'
-args.map_name = 'loop_obstacles'
+args.map_name = 'udem1'
 args.resize = 2
 
 my_seed = int(sys.argv[1])
