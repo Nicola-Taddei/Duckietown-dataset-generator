@@ -573,7 +573,7 @@ def generate(env, env_rand):
         if args.resize != -1:
             height_rand = int(obs_w_rand.shape[0] * (1/args.resize))
             width_rand = int(obs_w_rand.shape[1] * (1/args.resize))
-            obs_w = birdeye(obs_w)
+            obs_w_rand = birdeye(obs_w_rand)
             obs_w_rand = cv.resize(obs_w_rand, (width_rand, height_rand), interpolation = cv.INTER_AREA)
             obs_wo_rand = cv.resize(obs_wo_rand, (width_rand, height_rand), interpolation=cv.INTER_AREA)
             obs_ss_rand = cv.resize(obs_ss_rand, (width_rand, height_rand), interpolation=cv.INTER_AREA)
