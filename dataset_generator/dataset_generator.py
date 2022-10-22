@@ -515,12 +515,31 @@ def alter_ss(obs_ss, obs_diff):
     return obs_ss3, obs_ss2
 
 
+def birdeye(img, test=False):
+    """
+    Apply perspective transform to image, for theory see:
+    https://docs.opencv.org/3.4/da/d6e/tutorial_py_geometric_transformations.html
 
+    Also:
+    https://stackoverflow.com/questions/48264861/birds-eye-view-opencv
+    """
+    if not test:
+      black_wd = 2500
+      black_img = np.zeros(shape=(img.shape[0], black_wd, 3), dtype=np.uint8)
+      x_offset=int((black_wd-img.shape[0])/2)
+      black_img[:img.shape[0], x_offset:x_offset+img.shape[1]] = img
+      img = black_img
+    row, cols, ch = img.shape
+    if test:
+      src = np.float32([[90, 170], [620, 170], [0, 210], [720, 210]])
+    else:
+      src = np.float32([[1060, 170], [1600, 170], [110, row], [cols, row]])
+    dst = np.float32([[0,0],[640,0],[0,480],[640,480]])
+    M = cv.getPerspectiveTransform(src, dst)
+    img_transformed = cv.warpPerspective(img, M, (cols, row))
+    img_cutted_to_480_640 = img_transformed[:480, :640]
+    return img_cutted_to_480_640
 
-
-
-# find last index of images saved in dataset
-idx = 0
 
 def generate(env, env_rand):
     idx = 0
@@ -538,6 +557,7 @@ def generate(env, env_rand):
         if args.resize != -1:
             height = int(obs_w.shape[0] * (1/args.resize))
             width = int(obs_w.shape[1] * (1/args.resize))
+            obs_w = birdeye(obs_w)
             obs_w = cv.resize(obs_w, (width, height), interpolation = cv.INTER_AREA)
             obs_wo = cv.resize(obs_wo, (width, height), interpolation=cv.INTER_AREA)
             obs_ss = cv.resize(obs_ss, (width, height), interpolation=cv.INTER_AREA)
@@ -553,6 +573,7 @@ def generate(env, env_rand):
         if args.resize != -1:
             height_rand = int(obs_w_rand.shape[0] * (1/args.resize))
             width_rand = int(obs_w_rand.shape[1] * (1/args.resize))
+            obs_w = birdeye(obs_w)
             obs_w_rand = cv.resize(obs_w_rand, (width_rand, height_rand), interpolation = cv.INTER_AREA)
             obs_wo_rand = cv.resize(obs_wo_rand, (width_rand, height_rand), interpolation=cv.INTER_AREA)
             obs_ss_rand = cv.resize(obs_ss_rand, (width_rand, height_rand), interpolation=cv.INTER_AREA)
