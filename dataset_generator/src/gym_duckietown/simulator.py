@@ -514,7 +514,8 @@ class Simulator(gym.Env):
                 #obj.visible = self.np_random.randint(0, 2) == 0
                 obj.visible = True
             else:
-                obj.visible = True
+                #obj.visible = True
+                obj.visible = False
 
         # If the map specifies a starting tile
         if self.user_tile_start:
