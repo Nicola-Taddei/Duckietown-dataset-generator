@@ -1163,7 +1163,7 @@ class Simulator(gym.Env):
         results = [
             np.linalg.norm(x.pos - pos) < max(x.max_coords) * 0.5 * x.scale + MIN_SPAWN_OBJ_DIST
             for x in self.objects
-            if x.visible
+            #if x.visible
         ]
         return np.any(results)
 
