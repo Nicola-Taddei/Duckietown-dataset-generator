@@ -487,8 +487,8 @@ class Simulator(gym.Env):
 
         # Randomize tile parameters
         for tile in self.grid:
-            #rng = self.np_random if self.domain_rand else None
-            rng = self.np_random2
+            rng = self.np_random if self.domain_rand else None
+            #rng = self.np_random2
             # Randomize the tile texture
             texture_name = tile["kind"]
 
