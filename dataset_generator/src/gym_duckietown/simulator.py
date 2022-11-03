@@ -461,10 +461,12 @@ class Simulator(gym.Env):
         self.cam_fov_y = CAMERA_FOV_Y
 
         # Perturb using randomization API (either if domain rand or only camera rand
+        '''
         if self.domain_rand or self.camera_rand:
             self.cam_height *= self.randomization_settings["camera_height"]
             self.cam_angle = [CAMERA_ANGLE * self.randomization_settings["camera_angle"], 0, 0]
             self.cam_fov_y *= self.randomization_settings["camera_fov_y"]
+        '''
 
         # Camera offset for use in free camera mode
         self.cam_offset = np.array([0, 0, 0])
@@ -487,8 +489,8 @@ class Simulator(gym.Env):
 
         # Randomize tile parameters
         for tile in self.grid:
-            rng = self.np_random if self.domain_rand else None
-            #rng = self.np_random2
+            #rng = self.np_random if self.domain_rand else None
+            rng = None
             # Randomize the tile texture
             texture_name = tile["kind"]
 
