@@ -209,6 +209,7 @@ class Simulator(gym.Env):
         color_ground: Sequence[int] = (0.15, 0.15, 0.15),
         style: str = "photos",
         enable_leds: bool = False,
+        stereo_camera_offset: np.ndarray = np.array([0.15, 0, 0])
     ):
         """
 
@@ -233,6 +234,9 @@ class Simulator(gym.Env):
         :param style: String that represent which tiles will be loaded. One of ["photos", "synthetic"]
         :param enable_leds: Enables LEDs drawing.
         """
+
+        self.stereo_camera_offset = stereo_camera_offset  # remember that offset's projection on the ground plane cannot be bigger in module than MIN_SPAWN_OBJ_DIST
+
         self.enable_leds = enable_leds
         information = get_graphics_information()
         logger.info(f"Information about the graphics card: \n {information}")
@@ -562,7 +566,7 @@ class Simulator(gym.Env):
                 #                                          np.rad2deg(propose_angle)))
 
                 # If this is too close to an object or not a valid pose, retry
-                inconvenient = self._inconvenient_spawn(propose_pos)
+                inconvenient = self._inconvenient_spawn(propose_pos) 
 
                 if inconvenient:
                     # msg = 'The spawn was inconvenient.'
@@ -577,11 +581,11 @@ class Simulator(gym.Env):
 
                 # If the angle is too far away from the driving direction, retry
                 try:
-                    lp = self.get_lane_pos2(propose_pos, propose_angle)
+                    lp1 = self.get_lane_pos2(propose_pos, propose_angle)
                 except NotInLane:
                     continue
                 M = self.accept_start_angle_deg
-                ok = -M < lp.angle_deg < +M
+                ok = -M < lp1.angle_deg < +M
                 if not ok:
                     continue
                 # Found a valid initial pose
@@ -610,10 +614,13 @@ class Simulator(gym.Env):
         logger.info(f"Starting at {self.cur_pos} {self.cur_angle}")
 
         # Generate the first camera image
-        obs = self.render_obs(segment=segment)
+        obs1 = self.render_obs(segment=segment)
+        self.cam_offset += self.stereo_cam_offset
+        obs2 = self.render_obs(segment=segment)
+        self.cam_offset -= self.stereo_cam_offset
 
         # Return first observation
-        return obs
+        return [obs1,obs2]
 
     def _load_map(self, map_name: str):
         """
