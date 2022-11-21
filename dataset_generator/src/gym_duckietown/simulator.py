@@ -209,7 +209,6 @@ class Simulator(gym.Env):
         color_ground: Sequence[int] = (0.15, 0.15, 0.15),
         style: str = "photos",
         enable_leds: bool = False,
-        stereo_camera_offset: np.ndarray = np.array([0.15, 0, 0])
     ):
         """
 
@@ -234,9 +233,6 @@ class Simulator(gym.Env):
         :param style: String that represent which tiles will be loaded. One of ["photos", "synthetic"]
         :param enable_leds: Enables LEDs drawing.
         """
-
-        self.stereo_camera_offset = stereo_camera_offset  # remember that offset's projection on the ground plane cannot be bigger in module than MIN_SPAWN_OBJ_DIST
-
         self.enable_leds = enable_leds
         information = get_graphics_information()
         logger.info(f"Information about the graphics card: \n {information}")
@@ -465,10 +461,12 @@ class Simulator(gym.Env):
         self.cam_fov_y = CAMERA_FOV_Y
 
         # Perturb using randomization API (either if domain rand or only camera rand
+        '''
         if self.domain_rand or self.camera_rand:
             self.cam_height *= self.randomization_settings["camera_height"]
             self.cam_angle = [CAMERA_ANGLE * self.randomization_settings["camera_angle"], 0, 0]
             self.cam_fov_y *= self.randomization_settings["camera_fov_y"]
+        '''
 
         # Camera offset for use in free camera mode
         self.cam_offset = np.array([0, 0, 0])
@@ -491,7 +489,8 @@ class Simulator(gym.Env):
 
         # Randomize tile parameters
         for tile in self.grid:
-            rng = self.np_random if self.domain_rand else None
+            #rng = self.np_random if self.domain_rand else None
+            rng = None
             # Randomize the tile texture
             texture_name = tile["kind"]
 
@@ -515,9 +514,11 @@ class Simulator(gym.Env):
 
             # Randomize whether the object is visible or not
             if obj.optional and self.domain_rand:
-                obj.visible = self.np_random.randint(0, 2) == 0
-            else:
+                #obj.visible = self.np_random.randint(0, 2) == 0
                 obj.visible = True
+            else:
+                #obj.visible = True
+                obj.visible = False
 
         # If the map specifies a starting tile
         if self.user_tile_start:
@@ -566,7 +567,7 @@ class Simulator(gym.Env):
                 #                                          np.rad2deg(propose_angle)))
 
                 # If this is too close to an object or not a valid pose, retry
-                inconvenient = self._inconvenient_spawn(propose_pos) 
+                inconvenient = self._inconvenient_spawn(propose_pos)
 
                 if inconvenient:
                     # msg = 'The spawn was inconvenient.'
@@ -581,11 +582,11 @@ class Simulator(gym.Env):
 
                 # If the angle is too far away from the driving direction, retry
                 try:
-                    lp1 = self.get_lane_pos2(propose_pos, propose_angle)
+                    lp = self.get_lane_pos2(propose_pos, propose_angle)
                 except NotInLane:
                     continue
                 M = self.accept_start_angle_deg
-                ok = -M < lp1.angle_deg < +M
+                ok = -M < lp.angle_deg < +M
                 if not ok:
                     continue
                 # Found a valid initial pose
@@ -614,13 +615,10 @@ class Simulator(gym.Env):
         logger.info(f"Starting at {self.cur_pos} {self.cur_angle}")
 
         # Generate the first camera image
-        obs1 = self.render_obs(segment=segment)
-        self.cam_offset += self.stereo_cam_offset
-        obs2 = self.render_obs(segment=segment)
-        self.cam_offset -= self.stereo_cam_offset
+        obs = self.render_obs(segment=segment)
 
         # Return first observation
-        return [obs1,obs2]
+        return obs
 
     def _load_map(self, map_name: str):
         """
@@ -1170,7 +1168,7 @@ class Simulator(gym.Env):
         results = [
             np.linalg.norm(x.pos - pos) < max(x.max_coords) * 0.5 * x.scale + MIN_SPAWN_OBJ_DIST
             for x in self.objects
-            if x.visible
+            #if x.visible
         ]
         return np.any(results)
 
