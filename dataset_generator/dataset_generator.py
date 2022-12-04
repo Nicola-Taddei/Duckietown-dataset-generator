@@ -60,6 +60,8 @@ args.env_name = 'Duckietown-udem1-v0'
 args.map_name = 'udem1'
 args.resize = 2
 
+N = 0  # usual starting point
+
 EXPAND = True if sys.argv[1] == 'True' else False 
 if EXPAND:
     STATE_FILE_NAME = sys.argv[2]
