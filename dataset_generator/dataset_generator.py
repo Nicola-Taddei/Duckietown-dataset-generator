@@ -560,10 +560,10 @@ def birdeye(img, test=False):
 
 
 def generate(env, env_rand):
-    idx = 0
+    idx = N # 0
     global args
 
-    while idx <= args.dataset_size -1:
+    while idx <= N + args.dataset_size -1:
         # not rand
         env.reset()
         print("env_not_rand reset")
