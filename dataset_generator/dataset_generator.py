@@ -109,10 +109,10 @@ if not os.path.exists(os.path.join(args.dataset_path, 'rgb_orig_not_rand')):
 if not os.path.exists(os.path.join(args.dataset_path, 'rgb_orig_rand')):
     os.makedirs(os.path.join(args.dataset_path, 'rgb_orig_rand'))
 
-'''
 if not os.path.exists(os.path.join(args.dataset_path, "bezier_only")):
     os.makedirs(os.path.join(args.dataset_path, "bezier_only"))
 
+'''
 if not os.path.exists(args.dataset_path):
     os.makedirs(args.dataset_path)
 
@@ -591,7 +591,7 @@ def generate(env, env_rand):
             plt.imsave(os.path.join(args.dataset_path, 'rgb_ss', str(idx) + '_seg' + ".png"), obs_ss_wo_bez)
             plt.imsave(os.path.join(args.dataset_path, 'rgb_orig_rand',  str(idx) + ".png"), obs_wo_rand)
             plt.imsave(os.path.join(args.dataset_path, 'rgb_orig_not_rand',  str(idx) + ".png"), obs_wo)
-            #plt.imsave(os.path.join(args.dataset_path, 'bezier_only', str(idx) + '_seg' + ".png"), obs_diff)
+            plt.imsave(os.path.join(args.dataset_path, 'bezier_only', str(idx) + '_seg' + ".png"), obs_diff)
 
             '''
             plt.imsave(os.path.join(args.dataset_path, 'wo_bezier', 'rgb_orig_' + suff,  str(idx) + ".png"), obs_wo)
