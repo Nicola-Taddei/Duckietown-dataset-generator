@@ -32,6 +32,7 @@ import os
 from skimage.io import imsave
 import logging
 import cv2 as cv
+import pickle
 
 from gym_duckietown.objects import WorldObj
 from gym_duckietown.objmesh import ObjMesh
@@ -59,13 +60,20 @@ args.env_name = 'Duckietown-udem1-v0'
 args.map_name = 'udem1'
 args.resize = 2
 
-my_seed = int(sys.argv[1])
-my_dim = int(sys.argv[2])
+EXPAND = True if sys.argv[1] == 'True' else False 
+if EXPAND:
+    STATE_FILE_NAME = sys.argv[2]
+    N = int(sys.argv[3])
+    my_dim = int(sys.argv[4])
+else:
+    my_seed = int(sys.argv[2])
+    my_dim = int(sys.argv[3])
+
 
 args.dataset_size = my_dim
 
 env = DuckietownEnv(
-    seed = my_seed,
+    seed = 1 if EXPAND else my_seed,
     map_name = args.map_name,
     draw_curve = args.draw_curve,
     draw_bbox = args.draw_bbox,
@@ -76,7 +84,7 @@ env = DuckietownEnv(
 )
 
 env_not_rand = DuckietownEnv(
-    seed = my_seed,
+    seed = 1 if EXPAND else my_seed,
     map_name = args.map_name,
     draw_curve = args.draw_curve,
     draw_bbox = args.draw_bbox,
@@ -85,6 +93,13 @@ env_not_rand = DuckietownEnv(
     distortion = args.distortion,
     dynamics_rand = False
 )
+
+if EXPAND:
+    f = open(STATE_FILE_NAME, 'rb')
+    states = pickle.load(f)
+    f.close()
+    env_not_rand.set_state(states['env'])
+    env.set_state(states['env_rand'])
 
 logging.basicConfig()
 logger = logging.getLogger('gym-duckietown')
@@ -191,10 +206,13 @@ if not os.path.exists(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss_not
     os.makedirs(os.path.join(args.dataset_path, "bezier_only", 'rgb_ss_not_rand'))
 '''
 
+# maybe they are useful. Let's see
+'''
 env.reset()
 env.render()
 env_not_rand.reset()
 env_not_rand.render()
+'''
 
 
 
@@ -607,6 +625,9 @@ def generate(env, env_rand):
             '''
 
         idx += 1
+    f = open(os.path.join(args.dataset_path, 'random_states.txt'), 'wb')
+    pickle.dump({'env' : env.get_state(), 'env_rand' : env_rand.get_state()}, f)
+    f.close()
 
 
 generate(env_not_rand, env) # images with domain randomization on

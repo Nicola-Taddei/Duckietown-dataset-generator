@@ -825,6 +825,13 @@ class Simulator(gym.Env):
         self.np_random, _ = seeding.np_random(seed)
         self.np_random2, _ = seeding.np_random(seed)
         return [seed]
+    
+    def get_state(self):
+        return {'np_random' : self.np_random.get_state(), 'np_random2' : self.np_random2.get_state()}
+    
+    def set_state(self, states):
+        self.np_random.set_state(states['np_random'])
+        self.np_random2.set_state(states['np_random2'])
 
     def _set_tile(self, i: int, j: int, tile: TileDict) -> None:
         assert 0 <= i < self.grid_width
